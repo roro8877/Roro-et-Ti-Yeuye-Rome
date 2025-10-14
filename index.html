@@ -124,6 +124,16 @@
         question: "Quelle affiche est présente sur ma porte",
         answer: "Sortir la tête du tunnel", // insensible à la casse + accents ignorés
         hint: "Une expression"
+      },
+      {
+        id: 'appart',
+        name: 'Appart',
+        lat: 45.750905494764886, 
+        lng: 4.903803132674717,
+        radius: 20, // mètres
+        question: "Qui est en coloc avec nous",
+        answer: "Cam et Clem", // insensible à la casse + accents ignorés
+        hint: "Famille"
       }
       // 👉 Ajoute d'autres lieux ici
     ];
@@ -194,23 +204,34 @@
       if (state === 'done') {
         return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p><p class="hint">Tu peux revenir pour le plaisir 😉</p></div>`;
       }
-      // unlocked → afficher question
+      if (state === 'unlocked') {
+        // Étape à portée mais pas encore commencée
+        return `
+          <div class="popup">
+            <h3>${p.name}</h3>
+            <p>Tu es à portée. Prête ?</p>
+            <button onclick="window.__startChallenge('${p.id}')">Commencer le défi</button>
+          </div>`;
+      }
+      // state === 'started' → afficher la question (sans réécrire le popup pendant le suivi GPS)
       return `
         <div class="popup">
           <h3>${p.name}</h3>
           <p>${p.question}</p>
-          <input id="ans-${p.id}" type="text" placeholder="Réponse" />
+          <input id="ans-${p.id}" type="text" placeholder="Réponse" autofocus />
           <button onclick="window.__checkAnswer('${p.id}')">Valider</button>
           <p class="hint">Indice : ${p.hint || '—'}</p>
         </div>`;
     }
 
     const markersById = {};
+    const lastPopupState = {}; // mémorise le dernier état affiché pour éviter de recréer le contenu (et perdre le focus) = {};
 
     function addPlaceMarker(p) {
       const state = progress[p.id] || 'locked';
-      const marker = L.marker([p.lat, p.lng], { icon: state==='done'?IconDone: state==='unlocked'?IconUnlocked:IconLocked });
+      const marker = L.marker([p.lat, p.lng], { icon: state==='done'?IconDone: (state==='unlocked'||state==='started')?IconUnlocked:IconLocked });
       marker.bindPopup(placePopupContent(p));
+      marker.on('popupopen', () => { lastPopupState[p.id] = progress[p.id] || 'locked'; });
       marker.addTo(placesLayer);
       markersById[p.id] = marker;
     }
@@ -218,7 +239,7 @@
     function refreshMarker(p) {
       const marker = markersById[p.id];
       const state = progress[p.id] || 'locked';
-      marker.setIcon(state==='done'?IconDone: state==='unlocked'?IconUnlocked:IconLocked);
+      marker.setIcon(state==='done'?IconDone: (state==='unlocked'||state==='started')?IconUnlocked:IconLocked);
       marker.setPopupContent(placePopupContent(p));
     }
 
@@ -227,10 +248,21 @@
     renderList();
 
     // Rendre accessible aux boutons popup
+    window.__startChallenge = function(id) {
+      const p = PLACES.find(x => x.id === id);
+      if (!p) return;
+      progress[id] = 'started';
+      save('progress', progress);
+      refreshMarker(p);
+      markersById[id].openPopup();
+      lastPopupState[id] = 'started';
+    }
+
     window.__checkAnswer = function(id) {
       const p = PLACES.find(x => x.id === id);
       const input = document.getElementById(`ans-${id}`);
-      if (!p || !input) return;
+      if (!p) return;
+      if (!input) { return; }
       const ok = normalize(input.value) === normalize(p.answer);
       const gpsText = document.getElementById('gpsText');
       if (ok) {
@@ -239,8 +271,12 @@
         refreshMarker(p);
         renderList();
         gpsText.textContent = `Bravo ! Étape « ${p.name} » validée.`;
+        lastPopupState[id] = 'done';
       } else {
         gpsText.textContent = 'Mauvaise réponse, essaie encore.';
+        // garder le focus pour retaper
+        input.focus();
+        input.select && input.select();
       }
     }
 
@@ -304,19 +340,22 @@
           save('progress', progress);
           refreshMarker(p);
           renderList();
-          // Ouvrir le popup de la question
           markersById[p.id].openPopup();
+          lastPopupState[p.id] = 'unlocked';
         }
 
-        // Mettre à jour le contenu du popup selon l'état ACTUEL
+        // Mise à jour popup SANS casser le focus :
         const currState = progress[p.id] || 'locked';
         const m = markersById[p.id];
         if (m.isPopupOpen()) {
           if (currState === 'locked') {
-            m.setPopupContent(`<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es à <strong>${Math.round(d)} m</strong>. Approche à moins de <strong>${radius} m</strong> pour déverrouiller.</p></div>`);
-          } else {
-            // Si déverrouillé ou validé, afficher le vrai contenu (question ou message validé)
+            // Pour l'état verrouillé uniquement, on met à jour la distance dynamiquement
+            m.setPopupContent(`<div class=\"popup\"><h3>${p.name}</h3><p>🔒 Tu es à <strong>${Math.round(d)} m</strong>. Approche à moins de <strong>${radius} m</strong> pour déverrouiller.</p></div>`);
+            lastPopupState[p.id] = 'locked';
+          } else if (lastPopupState[p.id] !== currState) {
+            // Ne rafraîchir le contenu que si l'état a changé (évite de perdre le focus clavier)
             m.setPopupContent(placePopupContent(p));
+            lastPopupState[p.id] = currState;
           }
         }
       });
