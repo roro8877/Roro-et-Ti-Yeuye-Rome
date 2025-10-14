@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+  <title>Jeu de piste Rome – Carte interactive</title>
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <style>
+    :root {
+      --brand:#2b6cb0; --ok:#2f855a; --warn:#b7791f; --err:#c53030;
+    }
+    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
+    #app { display:flex; flex-direction:column; height:100%; }
+    header {
+      padding: 10px 14px; background: var(--brand); color: #fff; position: sticky; top: 0; z-index: 1000;
+      display:flex; align-items:center; justify-content:space-between; gap:12px;
+    }
+    header h1 { font-size: 16px; margin: 0; font-weight: 700; }
+    header .btn { border:0; background:rgba(255,255,255,.15); color:#fff; padding:8px 10px; border-radius:10px; font-size:14px; }
+    #map { flex: 1; }
+    .panel { position: fixed; left: 10px; right: 10px; bottom: 10px; display:flex; gap:10px; z-index:1001; }
+    .card { flex:1; background:#fff; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.15); padding:10px; }
+    .status { font-size:12px; color:#333; display:flex; justify-content:space-between; gap:8px; align-items:center; }
+    .status .dot { width:8px; height:8px; border-radius:999px; display:inline-block; margin-right:6px; }
+    .status .ok { background:var(--ok); }
+    .status .warn { background:var(--warn); }
+    .status .err { background:var(--err); }
+    .places { max-height: 28vh; overflow:auto; margin-top:6px; font-size:14px; }
+    .place-row { display:flex; align-items:center; justify-content:space-between; padding:8px; border-radius:10px; }
+    .place-row + .place-row { margin-top:6px; }
+    .place-row.locked { background:#f7fafc; }
+    .place-row.unlocked { background:#f0fff4; }
+    .place-row.done { background:#edf2f7; text-decoration: line-through; color:#4a5568; }
+    .place-row .right { font-size:12px; color:#4a5568; }
+    .fab { position: fixed; right: 16px; top: 60px; z-index: 1001; }
+    .fab button { border:0; background:#fff; box-shadow:0 6px 20px rgba(0,0,0,.2); border-radius:999px; padding:10px 12px; }
+    .leaflet-popup-content { margin: 10px; }
+    .popup h3 { margin: 0 0 8px 0; font-size:16px; }
+    .popup p { margin: 0 0 8px 0; }
+    .popup input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e0; margin-bottom: 8px; }
+    .popup button { width: 100%; padding: 10px; border-radius: 10px; border: 0; background: var(--brand); color:#fff; font-weight:600; }
+    .hint { font-size:12px; color:#4a5568; }
+    .badge { display:inline-flex; align-items:center; gap:6px; background:#edf2f7; border-radius:999px; padding:4px 8px; font-size:12px; }
+    .legend { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <h1>Jeu de piste Rome</h1>
+      <div class="legend">
+        <span class="badge">🔒 verrouillé</span>
+        <span class="badge">🔓 à portée</span>
+        <span class="badge">✅ validé</span>
+      </div>
+      <button id="btnReset" class="btn" title="Réinitialiser la progression">Réinitialiser</button>
+    </header>
+
+    <div id="map"></div>
+
+    <div class="fab">
+      <button id="btnLocate" title="Me localiser">📍</button>
+    </div>
+
+    <div class="panel">
+      <div class="card">
+        <div class="status" id="gpsStatus">
+          <div><span class="dot err" id="gpsDot"></span><span id="gpsText">GPS inactif</span></div>
+          <div><span id="accText">—</span></div>
+        </div>
+        <div class="places" id="placesList"></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+    // =============================
+    // 1) CONFIGURATION À PERSONNALISER
+    // =============================
+    // CONSEIL: ajoute tes clins d'œil perso dans 'question', 'hint' ou 'answer'.
+    const PLACES = [
+      {
+        id: 'colisee',
+        name: 'Colisée',
+        lat: 41.8902,
+        lng: 12.4922,
+        radius: 20, // mètres
+        question: "Au Colisée, notre 'gladiateur' du groupe avait quel surnom ?",
+        answer: "le buffle", // insensible à la casse + accents ignorés
+        hint: "Surnom crié pendant le match de 2018…"
+      },
+      {
+        id: 'trevi',
+        name: 'Fontaine de Trévi',
+        lat: 41.9009,
+        lng: 12.4833,
+        radius: 20,
+        question: "Quel vœu absurde avons-nous fait ce soir-là ? (un mot)",
+        answer: "licorne",
+        hint: "Animal mythique + gelato pistache"
+      },
+      {
+        id: 'pantheon',
+        name: 'Panthéon',
+        lat: 41.8986,
+        lng: 12.4769,
+        radius: 20,
+        question: "Comment s'appelle l'ouverture au sommet du dôme ?",
+        answer: "oculus",
+        hint: "Mot latin, 6 lettres"
+      },
+      {
+        id: 'cetu',
+        name: 'Cetu',
+        lat: 45.73814894730028, 
+        lng: 4.924226007905129,
+        radius: 20, // mètres
+        question: "Quelle affiche est présente sur ma porte",
+        answer: "Sortir la tête du tunnel", // insensible à la casse + accents ignorés
+        hint: "Une expression"
+      }
+      // 👉 Ajoute d'autres lieux ici
+    ];
+
+    // Options générales
+    const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
+    const TILE_ATTRIB = '&copy; contributeurs <a href="https://www.openstreetmap.org/">OpenStreetMap</a>';
+    const START_VIEW = [41.8986, 12.4769]; // Panthéon, centre sympa
+    const START_ZOOM = 15;
+    const GEO_OPTIONS = { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 };
+
+    // =============================
+    // 2) UTILITAIRES
+    // =============================
+    const normalize = (s) => (s||'').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').trim().toLowerCase();
+    const storageKey = (suffix) => `rome-game-${suffix}`;
+    const save = (k, v) => localStorage.setItem(storageKey(k), JSON.stringify(v));
+    const load = (k, def) => { try { return JSON.parse(localStorage.getItem(storageKey(k))) ?? def; } catch { return def; } };
+
+    // =============================
+    // 3) CARTE & COUCHES
+    // =============================
+    const map = L.map('map');
+    L.tileLayer(TILE_URL, { attribution: TILE_ATTRIB, maxZoom: 19 }).addTo(map);
+    map.setView(START_VIEW, START_ZOOM);
+
+    // Icônes
+    const IconLocked = new L.DivIcon({ className: 'icon-locked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #718096;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔒</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+    const IconUnlocked = new L.DivIcon({ className: 'icon-unlocked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #38a169;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔓</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+    const IconDone = new L.DivIcon({ className: 'icon-done', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #2b6cb0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">✅</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+
+    // État des lieux (progression)
+    const progress = load('progress', {}); // { [id]: 'locked'|'unlocked'|'done' }
+
+    // Calques
+    const placesLayer = L.layerGroup().addTo(map);
+
+    // Marqueur utilisateur + précision
+    let userMarker = null, accuracyCircle = null;
+
+    // =============================
+    // 4) RENDU LISTE + MARQUEURS
+    // =============================
+    const placesList = document.getElementById('placesList');
+
+    function renderList() {
+      placesList.innerHTML = '';
+      PLACES.forEach(p => {
+        const state = progress[p.id] || 'locked';
+        const row = document.createElement('div');
+        row.className = `place-row ${state}`;
+        row.innerHTML = `
+          <div><strong>${p.name}</strong><div class="hint">rayon ${p.radius} m</div></div>
+          <div class="right">${state === 'done' ? '✅' : state === 'unlocked' ? '🔓' : '🔒'}</div>
+        `;
+        row.onclick = () => {
+          map.setView([p.lat, p.lng], 18, { animate: true });
+        };
+        placesList.appendChild(row);
+      });
+    }
+
+    function placePopupContent(p) {
+      const state = progress[p.id] || 'locked';
+      if (state === 'locked') {
+        return `<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es trop loin pour déverrouiller cette étape. Approche-toi à moins de <strong>${p.radius} m</strong>.</p></div>`;
+      }
+      if (state === 'done') {
+        return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p><p class="hint">Tu peux revenir pour le plaisir 😉</p></div>`;
+      }
+      // unlocked → afficher question
+      return `
+        <div class="popup">
+          <h3>${p.name}</h3>
+          <p>${p.question}</p>
+          <input id="ans-${p.id}" type="text" placeholder="Réponse" />
+          <button onclick="window.__checkAnswer('${p.id}')">Valider</button>
+          <p class="hint">Indice : ${p.hint || '—'}</p>
+        </div>`;
+    }
+
+    const markersById = {};
+
+    function addPlaceMarker(p) {
+      const state = progress[p.id] || 'locked';
+      const marker = L.marker([p.lat, p.lng], { icon: state==='done'?IconDone: state==='unlocked'?IconUnlocked:IconLocked });
+      marker.bindPopup(placePopupContent(p));
+      marker.addTo(placesLayer);
+      markersById[p.id] = marker;
+    }
+
+    function refreshMarker(p) {
+      const marker = markersById[p.id];
+      const state = progress[p.id] || 'locked';
+      marker.setIcon(state==='done'?IconDone: state==='unlocked'?IconUnlocked:IconLocked);
+      marker.setPopupContent(placePopupContent(p));
+    }
+
+    // Initial render
+    PLACES.forEach(addPlaceMarker);
+    renderList();
+
+    // Rendre accessible aux boutons popup
+    window.__checkAnswer = function(id) {
+      const p = PLACES.find(x => x.id === id);
+      const input = document.getElementById(`ans-${id}`);
+      if (!p || !input) return;
+      const ok = normalize(input.value) === normalize(p.answer);
+      const gpsText = document.getElementById('gpsText');
+      if (ok) {
+        progress[id] = 'done';
+        save('progress', progress);
+        refreshMarker(p);
+        renderList();
+        gpsText.textContent = `Bravo ! Étape « ${p.name} » validée.`;
+      } else {
+        gpsText.textContent = 'Mauvaise réponse, essaie encore.';
+      }
+    }
+
+    // =============================
+    // 5) GÉOLOCALISATION / GEOFENCING
+    // =============================
+    const gpsDot = document.getElementById('gpsDot');
+    const gpsText = document.getElementById('gpsText');
+    const accText = document.getElementById('accText');
+
+    let watchId = null;
+
+    function setStatus(kind, text, acc) {
+      gpsDot.className = 'dot ' + (kind || 'err');
+      gpsText.textContent = text || '';
+      accText.textContent = acc ? `± ${Math.round(acc)} m` : '—';
+    }
+
+    function ensureLocate() {
+      if (!('geolocation' in navigator)) {
+        setStatus('err', 'Géolocalisation non supportée');
+        return;
+      }
+      if (watchId !== null) return; // déjà en cours
+      setStatus('warn', 'Demande de GPS…');
+      watchId = navigator.geolocation.watchPosition(onPos, onGeoError, GEO_OPTIONS);
+    }
+
+    function onGeoError(err) {
+      setStatus('err', err.message || 'Erreur de géolocalisation');
+    }
+
+    function onPos(pos) {
+      const { latitude, longitude, accuracy } = pos.coords;
+      const here = [latitude, longitude];
+
+      // Afficher/mettre à jour marqueur utilisateur
+      if (!userMarker) {
+        userMarker = L.marker(here, { title: 'Vous' }).addTo(map);
+      } else {
+        userMarker.setLatLng(here);
+      }
+      if (!accuracyCircle) {
+        accuracyCircle = L.circle(here, { radius: accuracy, weight: 1, fillOpacity: 0.1 });
+        accuracyCircle.addTo(map);
+      } else {
+        accuracyCircle.setLatLng(here).setRadius(accuracy);
+      }
+
+      setStatus('ok', 'GPS actif', accuracy);
+
+      // Vérifier distance à chaque lieu
+      PLACES.forEach(p => {
+        const prevState = progress[p.id] || 'locked';
+        const d = map.distance(here, [p.lat, p.lng]);
+        const radius = p.radius || 20;
+
+        // Déverrouillage si à portée et pas déjà validé
+        if (d <= radius && prevState === 'locked') {
+          progress[p.id] = 'unlocked';
+          save('progress', progress);
+          refreshMarker(p);
+          renderList();
+          // Ouvrir le popup de la question
+          markersById[p.id].openPopup();
+        }
+
+        // Mettre à jour le contenu du popup selon l'état ACTUEL
+        const currState = progress[p.id] || 'locked';
+        const m = markersById[p.id];
+        if (m.isPopupOpen()) {
+          if (currState === 'locked') {
+            m.setPopupContent(`<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es à <strong>${Math.round(d)} m</strong>. Approche à moins de <strong>${radius} m</strong> pour déverrouiller.</p></div>`);
+          } else {
+            // Si déverrouillé ou validé, afficher le vrai contenu (question ou message validé)
+            m.setPopupContent(placePopupContent(p));
+          }
+        }
+      });
+    }
+
+    // =============================
+    // 6) BOUTONS UI
+    // =============================
+    document.getElementById('btnLocate').addEventListener('click', () => {
+      ensureLocate();
+      if (userMarker) map.setView(userMarker.getLatLng(), 17, { animate: true });
+    });
+
+    document.getElementById('btnReset').addEventListener('click', () => {
+      if (!confirm('Réinitialiser toute la progression ?')) return;
+      localStorage.removeItem(storageKey('progress'));
+      Object.keys(progress).forEach(k => delete progress[k]);
+      PLACES.forEach(p => refreshMarker(p));
+      renderList();
+      setStatus('warn', 'Progression réinitialisée');
+    });
+
+    // Démarrage: restaurer progression
+    window.addEventListener('load', () => {
+      // resynchroniser icônes selon progression
+      PLACES.forEach(p => refreshMarker(p));
+      renderList();
+    });
+
+    // Astuce iOS: déclencher geoloc suite à une interaction utilisateur
+    // On invite l'utilisateur à appuyer sur 📍
+  </script>
+</body>
+</html>
