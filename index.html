@@ -4,54 +4,77 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
   <title>Jeu de piste Rome – Carte interactive</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
   <style>
-    :root {
-      --brand:#2b6cb0; --ok:#2f855a; --warn:#b7791f; --err:#c53030;
-    }
-    html, body { height: 100%; margin: 0; font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, 'Helvetica Neue', Arial, 'Noto Sans', 'Apple Color Emoji', 'Segoe UI Emoji'; }
-    #app { display:flex; flex-direction:column; height:100%; }
-    header {
-      padding: 10px 14px; background: var(--brand); color: #fff; position: sticky; top: 0; z-index: 1000;
-      display:flex; align-items:center; justify-content:space-between; gap:12px;
-    }
-    header h1 { font-size: 16px; margin: 0; font-weight: 700; }
-    header .btn { border:0; background:rgba(255,255,255,.15); color:#fff; padding:8px 10px; border-radius:10px; font-size:14px; }
-    #map { flex: 1; }
-    .panel { position: fixed; left: 10px; right: 10px; bottom: 10px; display:flex; gap:10px; z-index:1001; }
-    .card { flex:1; background:#fff; border-radius:14px; box-shadow:0 6px 20px rgba(0,0,0,.15); padding:10px; }
-    .status { font-size:12px; color:#333; display:flex; justify-content:space-between; gap:8px; align-items:center; }
-    .status .dot { width:8px; height:8px; border-radius:999px; display:inline-block; margin-right:6px; }
-    .status .ok { background:var(--ok); }
-    .status .warn { background:var(--warn); }
-    .status .err { background:var(--err); }
-    .places { max-height: 28vh; overflow:auto; margin-top:6px; font-size:14px; }
-    .place-row { display:flex; align-items:center; justify-content:space-between; padding:8px; border-radius:10px; }
-    .place-row + .place-row { margin-top:6px; }
-    .place-row.locked { background:#f7fafc; }
-    .place-row.unlocked { background:#f0fff4; }
-    .place-row.done { background:#edf2f7; text-decoration: line-through; color:#4a5568; }
-    .place-row .right { font-size:12px; color:#4a5568; }
-    .fab { position: fixed; right: 16px; top: 60px; z-index: 1001; }
-    .fab button { border:0; background:#fff; box-shadow:0 6px 20px rgba(0,0,0,.2); border-radius:999px; padding:10px 12px; }
-    .leaflet-popup-content { margin: 10px; }
-    .popup h3 { margin: 0 0 8px 0; font-size:16px; }
-    .popup p { margin: 0 0 8px 0; }
-    .popup input { width: 100%; padding: 10px; border-radius: 10px; border: 1px solid #cbd5e0; margin-bottom: 8px; }
-    .popup button { width: 100%; padding: 10px; border-radius: 10px; border: 0; background: var(--brand); color:#fff; font-weight:600; }
-    .hint { font-size:12px; color:#4a5568; }
-    .badge { display:inline-flex; align-items:center; gap:6px; background:#edf2f7; border-radius:999px; padding:4px 8px; font-size:12px; }
-    .legend { display:flex; gap:8px; align-items:center; flex-wrap:wrap; }
+    :root{--brand:#2b6cb0;--ok:#2f855a;--warn:#b7791f;--err:#c53030;}
+    html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji';}
+    /* Mise en page avec menu */
+    #app.with-drawer{display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr;min-height:100vh;}
+    #drawer{grid-row:1/span 2;grid-column:1;background:#0f2747;color:#fff;padding:12px;display:block;}
+    #drawer .drawer-header{font-weight:700;margin-bottom:10px;}
+    #drawer .nav-item{width:100%;text-align:left;background:transparent;border:0;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
+    #drawer .nav-item.active,#drawer .nav-item:hover{background:rgba(255,255,255,.12)}
+    header{grid-column:2;padding:10px 14px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header h1{font-size:16px;margin:0;font-weight:700}
+    header .btn{border:0;background:rgba(255,255,255,.15);color:#fff;padding:8px 10px;border-radius:10px;font-size:14px}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:#edf2f7;border-radius:999px;padding:4px 8px;font-size:12px;color:#1a202c}
+    .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    /* Écrans */
+    .screen{grid-column:2;display:none;position:relative}
+    .screen.visible{display:block}
+    /* Carte + panneaux */
+    #map{height:calc(100vh - 70px)}
+    #mapP3{height:60vh;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.08);margin-top:10px}
+    .panel{position:fixed;left:10px;right:10px;bottom:10px;display:flex;gap:10px;z-index:1001}
+    .card{flex:1;background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.15);padding:10px}
+    .status{font-size:12px;color:#333;display:flex;justify-content:space-between;gap:8px;align-items:center}
+    .status .dot{width:8px;height:8px;border-radius:999px;display:inline-block;margin-right:6px}
+    .status .ok{background:var(--ok)} .status .warn{background:var(--warn)} .status .err{background:var(--err)}
+    .places{max-height:28vh;overflow:auto;margin-top:6px;font-size:14px}
+    .place-row{display:flex;align-items:center;justify-content:space-between;padding:8px;border-radius:10px}
+    .place-row + .place-row{margin-top:6px}
+    .place-row.locked{background:#f7fafc}
+    .place-row.unlocked,.place-row.started{background:#f0fff4}
+    .place-row.done{background:#edf2f7;text-decoration:line-through;color:#4a5568}
+    .place-row .right{font-size:12px;color:#4a5568}
+    .fab{position:fixed;right:16px;top:60px;z-index:1001}
+    .fab button{border:0;background:#fff;box-shadow:0 6px 20px rgba(0,0,0,.2);border-radius:999px;padding:10px 12px}
+    .leaflet-popup-content{margin:10px}
+    .popup h3{margin:0 0 8px 0;font-size:16px}
+    .popup p{margin:0 0 8px 0}
+    .popup input{width:100%;padding:10px;border-radius:10px;border:1px solid #cbd5e0;margin-bottom:8px}
+    .popup button{width:100%;padding:10px;border-radius:10px;border:0;background:var(--brand);color:#fff;font-weight:600}
+    .hint{font-size:12px;color:#4a5568}
+    /* Progress bars */
+    .progress{margin:8px 0 10px}
+    .progress-row{font-size:14px;margin-bottom:6px}
+    .bar{background:#e2e8f0;border-radius:999px;height:10px;overflow:hidden}
+    .bar span{display:block;height:100%;background:var(--brand)}
+    details.key[disabled] summary{color:#718096}
+    /* Partie 2 : rooms/works */
+    .rooms{padding:12px;display:grid;gap:12px}
+    .room{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.08);padding:10px}
+    .room h3{margin-top:0}
+    .work{display:flex;gap:8px;align-items:center;padding:6px 0}
+    .work .state{width:22px;text-align:center}
+    .work input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid #cbd5e0}
+    .work button{padding:8px 10px;border-radius:8px;border:0;background:var(--brand);color:#fff}
+    .btn.small{padding:6px 10px;font-size:12px}
   </style>
 </head>
 <body>
-  <div id="app">
+  <div id="app" class="with-drawer">
+    <aside id="drawer">
+      <div class="drawer-header">Menu</div>
+      <nav>
+        <button class="nav-item active" data-target="part1">🗺️ Partie 1 — Rome</button>
+        <button class="nav-item" data-target="part2">🖼️ Partie 2 — Vatican</button>
+        <button class="nav-item" data-target="part3">🌳 Partie 3 — Finale</button>
+      </nav>
+    </aside>
+
     <header>
+      <button id="btnDrawer" class="btn" title="Ouvrir le menu">☰</button>
       <h1>Jeu de piste Rome</h1>
       <div class="legend">
         <span class="badge">🔒 verrouillé</span>
@@ -61,332 +84,411 @@
       <button id="btnReset" class="btn" title="Réinitialiser la progression">Réinitialiser</button>
     </header>
 
-    <div id="map"></div>
+    <!-- ===== PARTIE 1 : CARTE & DÉFIS ROME ===== -->
+    <section id="part1" class="screen visible">
+      <div id="map"></div>
 
-    <div class="fab">
-      <button id="btnLocate" title="Me localiser">📍</button>
-    </div>
-
-    <div class="panel">
-      <div class="card">
-        <div class="status" id="gpsStatus">
-          <div><span class="dot err" id="gpsDot"></span><span id="gpsText">GPS inactif</span></div>
-          <div><span id="accText">—</span></div>
-        </div>
-        <div class="places" id="placesList"></div>
+      <div class="fab">
+        <button id="btnLocate" title="Me localiser">📍</button>
       </div>
-    </div>
+
+      <div class="panel">
+        <div class="card">
+          <div class="status" id="gpsStatus">
+            <div><span class="dot err" id="gpsDot"></span><span id="gpsText">GPS inactif</span></div>
+            <div><span id="accText">—</span></div>
+          </div>
+          <div class="progress">
+            <div class="progress-row"><strong>Progression Partie 1</strong> — <span id="p1Pct">0%</span></div>
+            <div class="bar"><span id="p1Bar" style="width:0%"></span></div>
+          </div>
+          <details class="gages" id="p1Gages">
+            <summary>🎲 Gages (clique pour voir)</summary>
+            <ul>
+              <li><label><input type="radio" name="p1gage" value="0-20"> 0–20% : Paie le restaurant à tout le groupe</label></li>
+              <li><label><input type="radio" name="p1gage" value="20-40"> 20–40% : Paie ta tournée</label></li>
+              <li><label><input type="radio" name="p1gage" value="40-60"> 40–60% : Paie une glace à l'organisateur</label></li>
+              <li><label><input type="radio" name="p1gage" value="60-80"> 60–80% : Fais un discours en italien</label></li>
+              <li><label><input type="radio" name="p1gage" value="80-99"> 80–99% : Selfie statue + pose gladiateur</label></li>
+            </ul>
+            <button id="p1GageDone" class="btn small">✅ Gage effectué → valider la Partie 1 à 100%</button>
+          </details>
+          <details id="p1Key" class="key" disabled>
+            <summary>📁 Clé 1 (débloquée à 100%)</summary>
+            <div class="key-content"><strong>Blanc</strong></div>
+          </details>
+          <div class="places" id="placesList"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== PARTIE 2 : MUSÉES DU VATICAN ===== -->
+    <section id="part2" class="screen">
+      <div class="vatican">
+        <div class="card">
+          <div class="progress">
+            <div class="progress-row"><strong>Progression Partie 2</strong> — <span id="p2Pct">0%</span></div>
+            <div class="bar"><span id="p2Bar" style="width:0%"></span></div>
+          </div>
+          <details class="gages" id="p2Gages">
+            <summary>🎲 Gages (clique pour voir)</summary>
+            <ul>
+              <li><label><input type="radio" name="p2gage" value="0-20"> 0–20% : Paie le restaurant à tout le groupe</label></li>
+              <li><label><input type="radio" name="p2gage" value="20-40"> 20–40% : Paie ta tournée</label></li>
+              <li><label><input type="radio" name="p2gage" value="40-60"> 40–60% : Paie une glace à l'organisateur</label></li>
+              <li><label><input type="radio" name="p2gage" value="60-80"> 60–80% : Décris une œuvre en mimant</label></li>
+              <li><label><input type="radio" name="p2gage" value="80-99"> 80–99% : Selfie couloir des cartes</label></li>
+            </ul>
+            <button id="p2GageDone" class="btn small">✅ Gage effectué → valider la Partie 2 à 100%</button>
+          </details>
+          <details id="p2Key" class="key" disabled>
+            <summary>📁 Clé 2 (débloquée à 100%)</summary>
+            <div class="key-content"><strong>Visage</strong></div>
+          </details>
+        </div>
+
+        <div class="rooms" id="rooms"></div>
+      </div>
+    </section>
+
+    <!-- ===== PARTIE 3 : FINALE ===== -->
+    <section id="part3" class="screen">
+      <div class="card">
+        <h2>Finale — Trouve le parc</h2>
+        <p>Assemble les deux clés pour révéler le lieu final. Va au <strong>Point A</strong> (10 m) pour débloquer la vidéo de victoire.</p>
+        <div id="p3Status" class="hint">🔒 En attente : il faut débloquer <strong>Clé 1</strong> et <strong>Clé 2</strong>.</div>
+        <div class="progress">
+          <div class="progress-row"><strong>Avancée</strong> — <span id="p3Pct">0%</span></div>
+          <div class="bar"><span id="p3Bar" style="width:0%"></span></div>
+        </div>
+        <div id="p3Action" style="display:none">
+          <p>Dirige-toi vers le point final (rayon 10 m). Quand tu y es, le lien s'affiche :</p>
+          <a id="victoryLink" href="#" target="_blank" class="btn">🎉 Voir la vidéo</a>
+        </div>
+        <!-- Carte de la Partie 3 (affichée seulement si ≤ 1500 m de B et clés OK) -->
+        <div id="p3MapWrap" style="display:none">
+          <div id="mapP3"></div>
+        </div>
+      </div>
+    </section>
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
-    // =============================
-    // 1) CONFIGURATION À PERSONNALISER
-    // =============================
-    // CONSEIL: ajoute tes clins d'œil perso dans 'question', 'hint' ou 'answer'.
+    // ========= 1) CONFIG =========
     const PLACES = [
-      {
-        id: 'colisee',
-        name: 'Colisée',
-        lat: 41.8902,
-        lng: 12.4922,
-        radius: 20, // mètres
-        question: "Au Colisée, notre 'gladiateur' du groupe avait quel surnom ?",
-        answer: "le buffle", // insensible à la casse + accents ignorés
-        hint: "Surnom crié pendant le match de 2018…"
-      },
-      {
-        id: 'trevi',
-        name: 'Fontaine de Trévi',
-        lat: 41.9009,
-        lng: 12.4833,
-        radius: 20,
-        question: "Quel vœu absurde avons-nous fait ce soir-là ? (un mot)",
-        answer: "licorne",
-        hint: "Animal mythique + gelato pistache"
-      },
-      {
-        id: 'pantheon',
-        name: 'Panthéon',
-        lat: 41.8986,
-        lng: 12.4769,
-        radius: 20,
-        question: "Comment s'appelle l'ouverture au sommet du dôme ?",
-        answer: "oculus",
-        hint: "Mot latin, 6 lettres"
-      },
-      {
-        id: 'cetu',
-        name: 'Cetu',
-        lat: 45.73814894730028, 
-        lng: 4.924226007905129,
-        radius: 20, // mètres
-        question: "Quelle affiche est présente sur ma porte",
-        answer: "Sortir la tête du tunnel", // insensible à la casse + accents ignorés
-        hint: "Une expression"
-      },
-      {
-        id: 'appart',
-        name: 'Appart',
-        lat: 45.750905494764886, 
-        lng: 4.903803132674717,
-        radius: 20, // mètres
-        question: "Qui est en coloc avec nous",
-        answer: "Cam et Clem", // insensible à la casse + accents ignorés
-        hint: "Famille"
-      }
-      // 👉 Ajoute d'autres lieux ici
+      { id:'colisee', name:'Colisée', lat:41.8902, lng:12.4922, radius:20, question:"Au Colisée, notre 'gladiateur' du groupe avait quel surnom ?", answer:"le buffle", hint:"Surnom crié pendant le match de 2018…" },
+      { id:'trevi', name:'Fontaine de Trévi', lat:41.9009, lng:12.4833, radius:20, question:"Quel vœu absurde avons-nous fait ce soir-là ? (un mot)", answer:"licorne", hint:"Animal mythique + gelato pistache" },
+      { id:'cetu', name:'Mon Bureau', lat:48.886081401209935, lng:2.2372984498960102, radius:20, question:"Qui est mon collègue d'en face ?", answer:"EP", hint:"Animal mythique + gelato pistache" },
+      { id:'pantheon', name:'Panthéon', lat:41.8986, lng:12.4769, radius:20, question:"Comment s'appelle l'ouverture au sommet du dôme ?", answer:"oculus", hint:"Mot latin, 6 lettres" }
+      // 👉 Ajoute d'autres lieux
     ];
 
-    // Options générales
+    const ROOMS = [
+      { id:'salle1', name:'Salle 1', works:[
+        { id:'oeuvre1', title:"Raphaël – La Transfiguration", question:"Quel détail apparaît en haut à gauche ?", answer:"montagne", hint:"Paysage" },
+        { id:'oeuvre2', title:"Michel-Ange – Sibylle de Delphes", question:"L'objet qu'elle tient ?", answer:"livre", hint:"Lecture" }
+      ]},
+      { id:'salle2', name:'Salle 2', works:[
+        { id:'oeuvre3', title:"Carte de l'Italie – Couloir des cartes", question:"Quel golfe est indiqué près de Naples ?", answer:"golfe de naples", hint:"Géographie" }
+      ]}
+      // 👉 Ajoute tes salles/œuvres
+    ];
+
+    // Partie 3 — Point A (objectif final) + vidéo
+    const FINALE = { lat:48.87959474466595,  lng:2.238596548461005, radius:10, youtube:"https://www.youtube.com/watch?v=dQw4w9WgXcQ" };
+    // Partie 3 — Point B (déclencheur d'affichage de la carte P3 à 1500 m)
+    const P3_B = { lat:48.8843621343004,  lng:2.2462767830898454, radius:1500 };
+
     const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     const TILE_ATTRIB = '&copy; contributeurs <a href="https://www.openstreetmap.org/">OpenStreetMap</a>';
-    const START_VIEW = [41.8986, 12.4769]; // Panthéon, centre sympa
+    const START_VIEW = [41.8986, 12.4769];
     const START_ZOOM = 15;
     const GEO_OPTIONS = { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 };
 
-    // =============================
-    // 2) UTILITAIRES
-    // =============================
-    const normalize = (s) => (s||'').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').trim().toLowerCase();
-    const storageKey = (suffix) => `rome-game-${suffix}`;
-    const save = (k, v) => localStorage.setItem(storageKey(k), JSON.stringify(v));
-    const load = (k, def) => { try { return JSON.parse(localStorage.getItem(storageKey(k))) ?? def; } catch { return def; } };
+    // ========= 2) UTIL ========
+    const normalize = (s)=> (s||'').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').trim().toLowerCase();
+    const storageKey = (k)=> `rome-game-${k}`;
+    const save = (k,v)=> localStorage.setItem(storageKey(k), JSON.stringify(v));
+    const load = (k,def)=> { try{ return JSON.parse(localStorage.getItem(storageKey(k))) ?? def; } catch{ return def; } };
 
-    // =============================
-    // 3) CARTE & COUCHES
-    // =============================
+    // States persistés
+    const progress   = load('progress', {});       // Partie 1: { id: 'locked'|'unlocked'|'started'|'done' }
+    const p1Override = load('p1Override', false);  // gage → 100%
+    const p2State    = load('p2State', {});        // Partie 2: { salleId: { oeuvreId: 'done' } }
+    const p2Override = load('p2Override', false);
+
+    // ========= 3) PARTIE 1 — CARTE ========
     const map = L.map('map');
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIB, maxZoom: 19 }).addTo(map);
     map.setView(START_VIEW, START_ZOOM);
 
-    // Icônes
-    const IconLocked = new L.DivIcon({ className: 'icon-locked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #718096;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔒</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
-    const IconUnlocked = new L.DivIcon({ className: 'icon-unlocked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #38a169;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔓</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
-    const IconDone = new L.DivIcon({ className: 'icon-done', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #2b6cb0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">✅</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+    map.on('popupopen', (e) => {
+      const el = e.popup && e.popup.getElement ? e.popup.getElement() : (e.popup && e.popup._container);
+      if (el) { L.DomEvent.disableClickPropagation(el); L.DomEvent.disableScrollPropagation(el); }
+    });
 
-    // État des lieux (progression)
-    const progress = load('progress', {}); // { [id]: 'locked'|'unlocked'|'done' }
+    const IconLocked = new L.DivIcon({ className:'icon-locked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #718096;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔒</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+    const IconUnlocked = new L.DivIcon({ className:'icon-unlocked', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #38a169;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">🔓</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
+    const IconDone = new L.DivIcon({ className:'icon-done', html:'<div style="width:26px;height:26px;background:#fff;border:2px solid #2b6cb0;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 8px rgba(0,0,0,.25)">✅</div>', iconSize:[26,26], iconAnchor:[13,26], popupAnchor:[0,-20] });
 
-    // Calques
     const placesLayer = L.layerGroup().addTo(map);
-
-    // Marqueur utilisateur + précision
     let userMarker = null, accuracyCircle = null;
 
-    // =============================
-    // 4) RENDU LISTE + MARQUEURS
-    // =============================
     const placesList = document.getElementById('placesList');
 
-    function renderList() {
-      placesList.innerHTML = '';
-      PLACES.forEach(p => {
-        const state = progress[p.id] || 'locked';
-        const row = document.createElement('div');
-        row.className = `place-row ${state}`;
-        row.innerHTML = `
-          <div><strong>${p.name}</strong><div class="hint">rayon ${p.radius} m</div></div>
-          <div class="right">${state === 'done' ? '✅' : state === 'unlocked' ? '🔓' : '🔒'}</div>
-        `;
-        row.onclick = () => {
-          map.setView([p.lat, p.lng], 18, { animate: true });
-        };
-        placesList.appendChild(row);
+    function renderList(){
+      placesList.innerHTML='';
+      PLACES.forEach(p=>{
+        const st = progress[p.id] || 'locked';
+        const div = document.createElement('div');
+        div.className = `place-row ${st}`;
+        div.innerHTML = `<div><strong>${p.name}</strong><div class="hint">rayon ${p.radius} m</div></div><div class="right">${st==='done'?'✅': (st==='unlocked'||st==='started')?'🔓':'🔒'}</div>`;
+        div.onclick = ()=> map.setView([p.lat,p.lng], 18, {animate:true});
+        placesList.appendChild(div);
       });
+      updateP1Progress();
     }
 
-    function placePopupContent(p) {
-      const state = progress[p.id] || 'locked';
-      if (state === 'locked') {
-        return `<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es trop loin pour déverrouiller cette étape. Approche-toi à moins de <strong>${p.radius} m</strong>.</p></div>`;
-      }
-      if (state === 'done') {
-        return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p><p class="hint">Tu peux revenir pour le plaisir 😉</p></div>`;
-      }
-      if (state === 'unlocked') {
-        // Étape à portée mais pas encore commencée
-        return `
-          <div class="popup">
-            <h3>${p.name}</h3>
-            <p>Tu es à portée. Prête ?</p>
-            <button onclick="window.__startChallenge('${p.id}')">Commencer le défi</button>
-          </div>`;
-      }
-      // state === 'started' → afficher la question (sans réécrire le popup pendant le suivi GPS)
-      return `
-        <div class="popup">
-          <h3>${p.name}</h3>
-          <p>${p.question}</p>
-          <input id="ans-${p.id}" type="text" placeholder="Réponse" autofocus />
-          <button onclick="window.__checkAnswer('${p.id}')">Valider</button>
-          <p class="hint">Indice : ${p.hint || '—'}</p>
-        </div>`;
+    function placePopupContent(p){
+      const st = progress[p.id] || 'locked';
+      if(st==='locked') return `<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es trop loin. Approche à <strong>${p.radius} m</strong>.</p></div>`;
+      if(st==='done')   return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p></div>`;
+      if(st==='unlocked') return `<div class="popup"><h3>${p.name}</h3><p>Tu es à portée. Prêt(e)?</p><button onclick="event.stopPropagation(); window.__startChallenge('${p.id}'); return false;">Commencer le défi</button></div>`;
+      return `<div class="popup"><h3>${p.name}</h3><p>${p.question}</p><input id="ans-${p.id}" type="text" placeholder="Réponse" autofocus onclick="event.stopPropagation();" onfocus="event.stopPropagation();" /><button onclick="event.stopPropagation(); window.__checkAnswer('${p.id}'); return false;">Valider</button><p class="hint">Indice : ${p.hint||'—'}</p></div>`;
     }
 
-    const markersById = {};
-    const lastPopupState = {}; // mémorise le dernier état affiché pour éviter de recréer le contenu (et perdre le focus) = {};
+    const markersById = {}, lastPopupState = {};
 
-    function addPlaceMarker(p) {
-      const state = progress[p.id] || 'locked';
-      const marker = L.marker([p.lat, p.lng], { icon: state==='done'?IconDone: (state==='unlocked'||state==='started')?IconUnlocked:IconLocked });
-      marker.bindPopup(placePopupContent(p));
-      marker.on('popupopen', () => { lastPopupState[p.id] = progress[p.id] || 'locked'; });
-      marker.addTo(placesLayer);
-      markersById[p.id] = marker;
+    function addPlaceMarker(p){
+      const st = progress[p.id] || 'locked';
+      const m = L.marker([p.lat,p.lng], { icon: st==='done'?IconDone: (st==='unlocked'||st==='started')?IconUnlocked:IconLocked });
+      m.bindPopup(placePopupContent(p));
+      m.on('popupopen', ()=> lastPopupState[p.id] = progress[p.id] || 'locked');
+      m.addTo(placesLayer);
+      markersById[p.id]=m;
+    }
+    function refreshMarker(p){
+      const m = markersById[p.id];
+      const st = progress[p.id] || 'locked';
+      m.setIcon(st==='done'?IconDone: (st==='unlocked'||st==='started')?IconUnlocked:IconLocked);
+      m.setPopupContent(placePopupContent(p));
     }
 
-    function refreshMarker(p) {
-      const marker = markersById[p.id];
-      const state = progress[p.id] || 'locked';
-      marker.setIcon(state==='done'?IconDone: (state==='unlocked'||state==='started')?IconUnlocked:IconLocked);
-      marker.setPopupContent(placePopupContent(p));
-    }
-
-    // Initial render
     PLACES.forEach(addPlaceMarker);
-    renderList();
+    function renderMarkers(){ PLACES.forEach(refreshMarker); }
 
-    // Rendre accessible aux boutons popup
-    window.__startChallenge = function(id) {
-      const p = PLACES.find(x => x.id === id);
-      if (!p) return;
-      progress[id] = 'started';
-      save('progress', progress);
-      refreshMarker(p);
-      markersById[id].openPopup();
-      lastPopupState[id] = 'started';
-    }
+    window.__startChallenge = function(id){
+      const p=PLACES.find(x=>x.id===id); if(!p) return;
+      progress[id]='started'; save('progress',progress);
+      refreshMarker(p); markersById[id].openPopup(); lastPopupState[id]='started';
+      updateP1Progress();
+    };
 
-    window.__checkAnswer = function(id) {
-      const p = PLACES.find(x => x.id === id);
-      const input = document.getElementById(`ans-${id}`);
-      if (!p) return;
-      if (!input) { return; }
-      const ok = normalize(input.value) === normalize(p.answer);
-      const gpsText = document.getElementById('gpsText');
-      if (ok) {
-        progress[id] = 'done';
-        save('progress', progress);
-        refreshMarker(p);
-        renderList();
-        gpsText.textContent = `Bravo ! Étape « ${p.name} » validée.`;
-        lastPopupState[id] = 'done';
+    window.__checkAnswer = function(id){
+      const p=PLACES.find(x=>x.id===id); const input=document.getElementById(`ans-${id}`);
+      if(!p||!input) return;
+      const ok = normalize(input.value)===normalize(p.answer);
+      const gpsText=document.getElementById('gpsText');
+      if(ok){
+        progress[id]='done'; save('progress',progress);
+        refreshMarker(p); renderList();
+        gpsText.textContent=`Bravo ! Étape « ${p.name} » validée.`; lastPopupState[id]='done';
       } else {
-        gpsText.textContent = 'Mauvaise réponse, essaie encore.';
-        // garder le focus pour retaper
-        input.focus();
-        input.select && input.select();
+        gpsText.textContent='Mauvaise réponse, essaie encore.'; input.focus(); input.select&&input.select();
       }
+    };
+
+    function updateP1Progress(){
+      const total = PLACES.length;
+      const done  = PLACES.filter(p=>progress[p.id]==='done').length;
+      let pct = Math.round((done/Math.max(1,total))*100);
+      const override = load('p1Override', false);
+      if(override) pct=100;
+      document.getElementById('p1Pct').textContent = pct+'%';
+      document.getElementById('p1Bar').style.width = pct+'%';
+      const key = document.getElementById('p1Key');
+      if(pct>=100) key.removeAttribute('disabled'); else key.setAttribute('disabled','');
+      updateP3FromKeys();
     }
 
-    // =============================
-    // 5) GÉOLOCALISATION / GEOFENCING
-    // =============================
-    const gpsDot = document.getElementById('gpsDot');
-    const gpsText = document.getElementById('gpsText');
-    const accText = document.getElementById('accText');
-
-    let watchId = null;
-
-    function setStatus(kind, text, acc) {
-      gpsDot.className = 'dot ' + (kind || 'err');
-      gpsText.textContent = text || '';
-      accText.textContent = acc ? `± ${Math.round(acc)} m` : '—';
-    }
-
-    function ensureLocate() {
-      if (!('geolocation' in navigator)) {
-        setStatus('err', 'Géolocalisation non supportée');
-        return;
-      }
-      if (watchId !== null) return; // déjà en cours
-      setStatus('warn', 'Demande de GPS…');
-      watchId = navigator.geolocation.watchPosition(onPos, onGeoError, GEO_OPTIONS);
-    }
-
-    function onGeoError(err) {
-      setStatus('err', err.message || 'Erreur de géolocalisation');
-    }
-
-    function onPos(pos) {
-      const { latitude, longitude, accuracy } = pos.coords;
-      const here = [latitude, longitude];
-
-      // Afficher/mettre à jour marqueur utilisateur
-      if (!userMarker) {
-        userMarker = L.marker(here, { title: 'Vous' }).addTo(map);
-      } else {
-        userMarker.setLatLng(here);
-      }
-      if (!accuracyCircle) {
-        accuracyCircle = L.circle(here, { radius: accuracy, weight: 1, fillOpacity: 0.1 });
-        accuracyCircle.addTo(map);
-      } else {
-        accuracyCircle.setLatLng(here).setRadius(accuracy);
-      }
-
-      setStatus('ok', 'GPS actif', accuracy);
-
-      // Vérifier distance à chaque lieu
-      PLACES.forEach(p => {
-        const prevState = progress[p.id] || 'locked';
-        const d = map.distance(here, [p.lat, p.lng]);
-        const radius = p.radius || 20;
-
-        // Déverrouillage si à portée et pas déjà validé
-        if (d <= radius && prevState === 'locked') {
-          progress[p.id] = 'unlocked';
-          save('progress', progress);
-          refreshMarker(p);
-          renderList();
-          markersById[p.id].openPopup();
-          lastPopupState[p.id] = 'unlocked';
-        }
-
-        // Mise à jour popup SANS casser le focus :
-        const currState = progress[p.id] || 'locked';
-        const m = markersById[p.id];
-        if (m.isPopupOpen()) {
-          if (currState === 'locked') {
-            // Pour l'état verrouillé uniquement, on met à jour la distance dynamiquement
-            m.setPopupContent(`<div class=\"popup\"><h3>${p.name}</h3><p>🔒 Tu es à <strong>${Math.round(d)} m</strong>. Approche à moins de <strong>${radius} m</strong> pour déverrouiller.</p></div>`);
-            lastPopupState[p.id] = 'locked';
-          } else if (lastPopupState[p.id] !== currState) {
-            // Ne rafraîchir le contenu que si l'état a changé (évite de perdre le focus clavier)
-            m.setPopupContent(placePopupContent(p));
-            lastPopupState[p.id] = currState;
-          }
-        }
+    // ========= 4) PARTIE 2 — ROOMS ========
+    const roomsContainer = document.getElementById('rooms');
+    function renderRooms(){
+      roomsContainer.innerHTML='';
+      ROOMS.forEach(room=>{
+        const card=document.createElement('div'); card.className='room';
+        card.innerHTML = `<h3>${room.name}</h3>`;
+        const list=document.createElement('div');
+        const state = p2State[room.id] || {};
+        room.works.forEach(w=>{
+          const done = state[w.id]==='done';
+          const row=document.createElement('div'); row.className='work';
+          row.innerHTML = `<div class="state">${done?'✅':'🕵️'}</div>
+            <div class="title" style="flex:1"><strong>${w.title}</strong><div class="hint">${w.question}</div></div>
+            <input type="text" id="w-${room.id}-${w.id}" placeholder="Réponse" ${done?'disabled':''}/>
+            <button data-room="${room.id}" data-work="${w.id}">${done?'Répondu':'Valider'}</button>`;
+          list.appendChild(row);
+        });
+        card.appendChild(list);
+        roomsContainer.appendChild(card);
+      });
+      roomsContainer.querySelectorAll('button[data-room]').forEach(btn=>{
+        btn.onclick=()=>{
+          const roomId=btn.getAttribute('data-room'); const workId=btn.getAttribute('data-work');
+          const room=ROOMS.find(r=>r.id===roomId); const work=room.works.find(x=>x.id===workId);
+          const input=document.getElementById(`w-${roomId}-${workId}`); if(!input) return;
+          const ok=normalize(input.value)===normalize(work.answer);
+          if(ok){
+            p2State[roomId]=p2State[roomId]||{}; p2State[roomId][workId]='done'; save('p2State',p2State);
+            renderRooms(); updateP2Progress();
+          }else{ input.focus(); input.select&&input.select(); }
+        };
       });
     }
 
-    // =============================
-    // 6) BOUTONS UI
-    // =============================
-    document.getElementById('btnLocate').addEventListener('click', () => {
-      ensureLocate();
-      if (userMarker) map.setView(userMarker.getLatLng(), 17, { animate: true });
-    });
+    function updateP2Progress(){
+      const total = ROOMS.reduce((s,r)=>s+r.works.length,0);
+      const done  = ROOMS.reduce((s,r)=> s + (Object.values(p2State[r.id]||{}).filter(v=>v==='done').length), 0);
+      let pct = Math.round((done/Math.max(1,total))*100);
+      const override = load('p2Override', false);
+      if(override) pct=100;
+      document.getElementById('p2Pct').textContent = pct+'%';
+      document.getElementById('p2Bar').style.width = pct+'%';
+      const key = document.getElementById('p2Key');
+      if(pct>=100) key.removeAttribute('disabled'); else key.setAttribute('disabled','');
+      updateP3FromKeys();
+    }
 
-    document.getElementById('btnReset').addEventListener('click', () => {
-      if (!confirm('Réinitialiser toute la progression ?')) return;
-      localStorage.removeItem(storageKey('progress'));
-      Object.keys(progress).forEach(k => delete progress[k]);
-      PLACES.forEach(p => refreshMarker(p));
-      renderList();
-      setStatus('warn', 'Progression réinitialisée');
-    });
+    // ========= 5) PARTIE 3 — CLÉS + GEOFENCE + CARTE POINT B & CHAUD/FROID ========
+    const p3Status=document.getElementById('p3Status');
+    const p3Action=document.getElementById('p3Action');
+    const p3Pct=document.getElementById('p3Pct');
+    const p3Bar=document.getElementById('p3Bar');
+    const victoryLink=document.getElementById('victoryLink'); victoryLink.href = FINALE.youtube;
 
-    // Démarrage: restaurer progression
-    window.addEventListener('load', () => {
-      // resynchroniser icônes selon progression
-      PLACES.forEach(p => refreshMarker(p));
-      renderList();
-    });
+    // Carte de la Partie 3
+    const p3MapWrap = document.getElementById('p3MapWrap');
+    let p3Map=null, p3UserMarker=null, p3BCircle=null, p3ACircle=null, p3AMarker=null;
 
-    // Astuce iOS: déclencher geoloc suite à une interaction utilisateur
-    // On invite l'utilisateur à appuyer sur 📍
+    // Dégradé couleur du marqueur utilisateur selon distance au Point A
+    function lerp(a,b,t){ return a + (b-a)*t; }
+    function heatColor(distance){
+      // 0 m → rouge, ≥1500 m → bleu
+      const max=1500; const t = 1 - Math.min(distance, max)/max;
+      const r = Math.round(lerp(30, 220, t));   // bleu(30,58,138) → rouge(220,38,38)
+      const g = Math.round(lerp(58, 38, t));
+      const b = Math.round(lerp(138, 38, t));
+      return `rgb(${r},${g},${b})`;
+    }
+    function userDivIcon(color){
+      return new L.DivIcon({
+        className:'p3-user',
+        html:`<div style="width:22px;height:22px;border:2px solid #fff;background:${color};border-radius:50%;box-shadow:0 2px 8px rgba(0,0,0,.25)"></div>`,
+        iconSize:[22,22], iconAnchor:[11,11]
+      });
+    }
+
+    function updateP3FromKeys(){
+      const k1=!document.getElementById('p1Key').hasAttribute('disabled');
+      const k2=!document.getElementById('p2Key').hasAttribute('disabled');
+      const pct=(k1?50:0)+(k2?50:0);
+      p3Pct.textContent=pct+'%'; p3Bar.style.width=pct+'%';
+      if(k1&&k2){ p3Status.textContent='✅ Clés réunies ! Va au point final (10 m).'; p3Action.style.display='block'; }
+      else { p3Status.innerHTML='🔒 En attente : il faut débloquer <strong>Clé 1</strong> et <strong>Clé 2</strong>.'; p3Action.style.display='none'; }
+    }
+
+    // ========= 6) GÉOLOCALISATION COMMUNE ========
+    const gpsDot=document.getElementById('gpsDot');
+    const gpsText=document.getElementById('gpsText');
+    const accText=document.getElementById('accText');
+    let watchId=null;
+    function setStatus(kind,text,acc){ gpsDot.className='dot '+(kind||'err'); gpsText.textContent=text||''; accText.textContent=acc?`± ${Math.round(acc)} m`:'—'; }
+    function ensureLocate(){ if(!('geolocation' in navigator)){ setStatus('err','Géolocalisation non supportée'); return; } if(watchId!==null) return; setStatus('warn','Demande de GPS…'); watchId=navigator.geolocation.watchPosition(onPos,onGeoError,GEO_OPTIONS); }
+    function onGeoError(err){ setStatus('err',err.message||'Erreur de géolocalisation'); }
+
+    const finaleCircle = L.circle([FINALE.lat, FINALE.lng], { radius: FINALE.radius, color:'#2b6cb0', weight:1, fillOpacity:0.05 });
+
+    function onPos(pos){
+      const { latitude, longitude, accuracy } = pos.coords; const here=[latitude,longitude];
+      // Marqueur utilisateur (Partie 1)
+      if(!userMarker){ userMarker=L.marker(here,{title:'Vous'}).addTo(map); } else { userMarker.setLatLng(here); }
+      if(!accuracyCircle){ accuracyCircle=L.circle(here,{radius:accuracy,weight:1,fillOpacity:0.1}).addTo(map); } else { accuracyCircle.setLatLng(here).setRadius(accuracy); }
+      setStatus('ok','GPS actif',accuracy);
+
+      // Déverrouillage P1
+      PLACES.forEach(p=>{
+        const prev=progress[p.id]||'locked';
+        const d=map.distance(here,[p.lat,p.lng]); const r=p.radius||20;
+        if(d<=r && prev==='locked'){
+          progress[p.id]='unlocked'; save('progress',progress);
+          refreshMarker(p); renderList(); markersById[p.id].openPopup(); lastPopupState[p.id]='unlocked';
+        }
+        const curr=progress[p.id]||'locked'; const m=markersById[p.id];
+        if(m.isPopupOpen()){
+          if(curr==='locked'){
+            m.setPopupContent(`<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es à <strong>${Math.round(d)} m</strong>. Approche à moins de <strong>${r} m</strong>.</p></div>`);
+            lastPopupState[p.id]='locked';
+          } else if(lastPopupState[p.id]!==curr){ m.setPopupContent(placePopupContent(p)); lastPopupState[p.id]=curr; }
+        }
+      });
+
+      // Partie 3 : Carte conditionnelle autour de B + couleur “chaud/froid” vers A
+      const keysOK = !document.getElementById('p1Key').hasAttribute('disabled') && !document.getElementById('p2Key').hasAttribute('disabled');
+      if(keysOK){
+        const dB = map.distance(here, [P3_B.lat, P3_B.lng]);
+        if(dB <= (P3_B.radius||1500)){
+          // Afficher/initialiser carte P3
+          p3MapWrap.style.display='block';
+          if(!p3Map){
+            p3Map = L.map('mapP3');
+            L.tileLayer(TILE_URL, { attribution: TILE_ATTRIB, maxZoom: 19 }).addTo(p3Map);
+            p3Map.setView([P3_B.lat, P3_B.lng], 15);
+            p3BCircle = L.circle([P3_B.lat, P3_B.lng], { radius: P3_B.radius, color:'#2b6cb0', weight:1, fillOpacity:0.03 }).addTo(p3Map);
+            p3ACircle = L.circle([FINALE.lat, FINALE.lng], { radius: FINALE.radius, color:'#dc2626', weight:1, fillOpacity:0.06 }).addTo(p3Map);
+            p3AMarker = L.marker([FINALE.lat, FINALE.lng], { title:'Point A (objectif)' }).addTo(p3Map);
+          }
+          // Mettre à jour marqueur utilisateur P3 + couleur
+          const dA = map.distance(here, [FINALE.lat, FINALE.lng]);
+          const color = heatColor(dA);
+          if(!p3UserMarker){ p3UserMarker = L.marker(here, { icon: userDivIcon(color) }).addTo(p3Map); }
+          else { p3UserMarker.setLatLng(here); p3UserMarker.setIcon(userDivIcon(color)); }
+          // Victoire à 10 m
+          if(dA <= (FINALE.radius||10)){
+            p3Status.textContent='🎯 Point final atteint !';
+            p3Action.style.display='block';
+          }
+        } else {
+          // Hors zone de B → cacher la carte P3
+          p3MapWrap.style.display='none';
+        }
+      }
+    }
+
+    // ========= 7) NAV + BOUTONS ========
+    document.getElementById('btnLocate').addEventListener('click', ()=>{ ensureLocate(); if(userMarker) map.setView(userMarker.getLatLng(), 17, {animate:true}); });
+    document.getElementById('btnReset').addEventListener('click', ()=>{ if(!confirm('Réinitialiser toute la progression ?')) return; localStorage.clear(); location.reload(); });
+
+    document.getElementById('p1GageDone').addEventListener('click', ()=>{ save('p1Override', true); updateP1Progress(); alert('Partie 1 validée à 100%'); });
+    document.getElementById('p2GageDone').addEventListener('click', ()=>{ save('p2Override', true); updateP2Progress(); alert('Partie 2 validée à 100%'); });
+
+    const drawerBtn=document.getElementById('btnDrawer');
+    const navButtons=[...document.querySelectorAll('#drawer .nav-item')];
+    drawerBtn.addEventListener('click', ()=>{ const d=document.getElementById('drawer'); d.style.display=(d.style.display==='none'?'block':'none'); });
+    navButtons.forEach(btn=>btn.addEventListener('click', ()=>{
+      navButtons.forEach(b=>b.classList.remove('active')); btn.classList.add('active');
+      const target=btn.getAttribute('data-target');
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+      document.getElementById(target).classList.add('visible');
+      if(target==='part1'){ setTimeout(()=> map.invalidateSize(), 50); }
+      if(target==='part3' && p3Map){ setTimeout(()=> p3Map.invalidateSize(), 50); }
+    }));
+
+    // ========= 8) RENDER INIT ========
+    PLACES.forEach(addPlaceMarker); renderList();
+    renderRooms(); updateP2Progress();
+    updateP1Progress(); updateP3FromKeys();
+    // iOS : demander d'appuyer sur 📍 pour activer la géoloc
   </script>
 </body>
 </html>
