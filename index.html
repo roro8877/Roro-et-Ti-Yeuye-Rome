@@ -14,6 +14,7 @@
     #drawer .drawer-header{font-weight:700;margin-bottom:10px;}
     #drawer .nav-item{width:100%;text-align:left;background:transparent;border:0;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
     #drawer .nav-item.active,#drawer .nav-item:hover{background:rgba(255,255,255,.12)}
+    #drawer .nav-item[disabled]{opacity:.5; pointer-events:none; cursor:not-allowed;}
     header{grid-column:2;padding:10px 14px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px}
     header h1{font-size:16px;margin:0;font-weight:700}
     header .btn{border:0;background:rgba(255,255,255,.15);color:#fff;padding:8px 10px;border-radius:10px;font-size:14px}
@@ -50,7 +51,9 @@
     .progress-row{font-size:14px;margin-bottom:6px}
     .bar{background:#e2e8f0;border-radius:999px;height:10px;overflow:hidden}
     .bar span{display:block;height:100%;background:var(--brand)}
-    details.key[disabled] summary{color:#718096}
+    details.key[disabled] summary { color:#718096; }
+    details.key[disabled] { pointer-events: none; opacity: 0.7; }
+    details.key[disabled] .key-content { display: none; }
     /* Partie 2 : rooms/works */
     .rooms{padding:12px;display:grid;gap:12px}
     .room{background:#fff;border-radius:14px;box-shadow:0 6px 20px rgba(0,0,0,.08);padding:10px}
@@ -162,9 +165,13 @@
           <div class="bar"><span id="p3Bar" style="width:0%"></span></div>
         </div>
         <div id="p3Action" style="display:none">
-          <p>Dirige-toi vers le point final (rayon 10 m). Quand tu y es, le lien s'affiche :</p>
-          <a id="victoryLink" href="#" target="_blank" class="btn">🎉 Voir la vidéo</a>
+          <p>Dirige-toi vers le point final (rayon 10 m). Quand tu y es, ouvre le dossier <strong>Victoire</strong>.</p>
         </div>
+        <!-- Dossier Victoire (débloqué uniquement quand le Point A est atteint) -->
+        <details id="p3Victory" class="key" disabled>
+          <summary>📁 Victoire</summary>
+          <div class="key-content"><a id="victoryLink" href="#" target="_blank" class="btn">🎉 Voir la vidéo</a></div>
+        </details>
         <!-- Carte de la Partie 3 (affichée seulement si ≤ 1500 m de B et clés OK) -->
         <div id="p3MapWrap" style="display:none">
           <div id="mapP3"></div>
@@ -179,7 +186,7 @@
     const PLACES = [
       { id:'colisee', name:'Colisée', lat:41.8902, lng:12.4922, radius:20, question:"Au Colisée, notre 'gladiateur' du groupe avait quel surnom ?", answer:"le buffle", hint:"Surnom crié pendant le match de 2018…" },
       { id:'trevi', name:'Fontaine de Trévi', lat:41.9009, lng:12.4833, radius:20, question:"Quel vœu absurde avons-nous fait ce soir-là ? (un mot)", answer:"licorne", hint:"Animal mythique + gelato pistache" },
-      { id:'cetu', name:'Mon Bureau', lat:48.886081401209935, lng:2.2372984498960102, radius:20, question:"Qui est mon collègue d'en face ?", answer:"EP", hint:"Animal mythique + gelato pistache" },
+      { id:'cetu', name:'Mon Bureau', lat:45.73816138599714,  lng:4.924374644771908, radius:20, question:"Qui est mon collègue d'en face ?", answer:"EP", hint:"Animal mythique + gelato pistache" },
       { id:'pantheon', name:'Panthéon', lat:41.8986, lng:12.4769, radius:20, question:"Comment s'appelle l'ouverture au sommet du dôme ?", answer:"oculus", hint:"Mot latin, 6 lettres" }
       // 👉 Ajoute d'autres lieux
     ];
@@ -196,7 +203,7 @@
     ];
 
     // Partie 3 — Point A (objectif final) + vidéo
-    const FINALE = { lat:48.87959474466595,  lng:2.238596548461005, radius:10, youtube:"https://www.youtube.com/watch?v=dQw4w9WgXcQ" };
+    const FINALE = { lat:48.88604516592345,   lng:2.2373824246612455, radius:10, youtube:"https://www.youtube.com/watch?v=dQw4w9WgXcQ" };
     // Partie 3 — Point B (déclencheur d'affichage de la carte P3 à 1500 m)
     const P3_B = { lat:48.8843621343004,  lng:2.2462767830898454, radius:1500 };
 
@@ -217,6 +224,10 @@
     const p1Override = load('p1Override', false);  // gage → 100%
     const p2State    = load('p2State', {});        // Partie 2: { salleId: { oeuvreId: 'done' } }
     const p2Override = load('p2Override', false);
+    // Nouvelles persistance des réponses validées
+    const p1Answers = load('p1Answers', {});   // { placeId: 'réponse' }
+    const p2Answers = load('p2Answers', {});   // { 'roomId.workId': 'réponse' }
+    const p3VictoryState = false;
 
     // ========= 3) PARTIE 1 — CARTE ========
     const map = L.map('map');
@@ -243,7 +254,8 @@
         const st = progress[p.id] || 'locked';
         const div = document.createElement('div');
         div.className = `place-row ${st}`;
-        div.innerHTML = `<div><strong>${p.name}</strong><div class="hint">rayon ${p.radius} m</div></div><div class="right">${st==='done'?'✅': (st==='unlocked'||st==='started')?'🔓':'🔒'}</div>`;
+        const answerTag = (st==='done' && p1Answers[p.id]) ? `<div class="hint">Réponse : <em>${p1Answers[p.id]}</em></div>` : `<div class="hint">rayon ${p.radius} m</div>`;
+        div.innerHTML = `<div><strong>${p.name}</strong>${answerTag}</div><div class="right">${st==='done'?'✅': (st==='unlocked'||st==='started')?'🔓':'🔒'}</div>`;
         div.onclick = ()=> map.setView([p.lat,p.lng], 18, {animate:true});
         placesList.appendChild(div);
       });
@@ -252,9 +264,17 @@
 
     function placePopupContent(p){
       const st = progress[p.id] || 'locked';
-      if(st==='locked') return `<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es trop loin. Approche à <strong>${p.radius} m</strong>.</p></div>`;
-      if(st==='done')   return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p></div>`;
-      if(st==='unlocked') return `<div class="popup"><h3>${p.name}</h3><p>Tu es à portée. Prêt(e)?</p><button onclick="event.stopPropagation(); window.__startChallenge('${p.id}'); return false;">Commencer le défi</button></div>`;
+      if(st==='locked'){
+        return `<div class="popup"><h3>${p.name}</h3><p>🔒 Tu es trop loin. Approche à <strong>${p.radius} m</strong>.</p></div>`;
+      }
+      if(st==='done'){
+        const ans = p1Answers[p.id] ? `<p><strong>Réponse :</strong> ${p1Answers[p.id]}</p>` : '';
+        return `<div class="popup"><h3>${p.name}</h3><p>✅ Déjà validé !</p>${ans}</div>`;
+      }
+      if(st==='unlocked'){
+        return `<div class="popup"><h3>${p.name}</h3><p>Tu es à portée. Prêt(e)?</p><button onclick="event.stopPropagation(); window.__startChallenge('${p.id}'); return false;">Commencer le défi</button></div>`;
+      }
+      // started
       return `<div class="popup"><h3>${p.name}</h3><p>${p.question}</p><input id="ans-${p.id}" type="text" placeholder="Réponse" autofocus onclick="event.stopPropagation();" onfocus="event.stopPropagation();" /><button onclick="event.stopPropagation(); window.__checkAnswer('${p.id}'); return false;">Valider</button><p class="hint">Indice : ${p.hint||'—'}</p></div>`;
     }
 
@@ -288,10 +308,13 @@
     window.__checkAnswer = function(id){
       const p=PLACES.find(x=>x.id===id); const input=document.getElementById(`ans-${id}`);
       if(!p||!input) return;
-      const ok = normalize(input.value)===normalize(p.answer);
+      const userVal = input.value;
+      const ok = normalize(userVal)===normalize(p.answer);
       const gpsText=document.getElementById('gpsText');
       if(ok){
-        progress[id]='done'; save('progress',progress);
+        progress[id]='done';
+        p1Answers[id] = userVal; // conserve la réponse telle que saisie
+        save('progress',progress); save('p1Answers', p1Answers);
         refreshMarker(p); renderList();
         gpsText.textContent=`Bravo ! Étape « ${p.name} » validée.`; lastPopupState[id]='done';
       } else {
@@ -308,8 +331,9 @@
       document.getElementById('p1Pct').textContent = pct+'%';
       document.getElementById('p1Bar').style.width = pct+'%';
       const key = document.getElementById('p1Key');
-      if(pct>=100) key.removeAttribute('disabled'); else key.setAttribute('disabled','');
-      updateP3FromKeys();
+      if(pct>=100){ key.removeAttribute('disabled'); }
+      else { key.setAttribute('disabled',''); key.removeAttribute('open'); }
+      updateP3FromKeys(); updatePart2Lock();
     }
 
     // ========= 4) PARTIE 2 — ROOMS ========
@@ -323,11 +347,13 @@
         const state = p2State[room.id] || {};
         room.works.forEach(w=>{
           const done = state[w.id]==='done';
+          const key = `${room.id}.${w.id}`;
+          const savedVal = p2Answers[key] || '';
           const row=document.createElement('div'); row.className='work';
-          row.innerHTML = `<div class="state">${done?'✅':'🕵️'}</div>
-            <div class="title" style="flex:1"><strong>${w.title}</strong><div class="hint">${w.question}</div></div>
-            <input type="text" id="w-${room.id}-${w.id}" placeholder="Réponse" ${done?'disabled':''}/>
-            <button data-room="${room.id}" data-work="${w.id}">${done?'Répondu':'Valider'}</button>`;
+          row.innerHTML = `<div class=\"state\">${done?'✅':'🕵️'}</div>
+            <div class=\"title\" style=\"flex:1\"><strong>${w.title}</strong><div class=\"hint\">${w.question}</div></div>
+            <input type=\"text\" id=\"w-${room.id}-${w.id}\" placeholder=\"Réponse\" ${done?'disabled':''} value=\"${done ? savedVal.replace(/\"/g,'\\"') : ''}\"/>
+            <button data-room=\"${room.id}\" data-work=\"${w.id}\">${done?'Répondu':'Valider'}</button>`;
           list.appendChild(row);
         });
         card.appendChild(list);
@@ -340,7 +366,11 @@
           const input=document.getElementById(`w-${roomId}-${workId}`); if(!input) return;
           const ok=normalize(input.value)===normalize(work.answer);
           if(ok){
-            p2State[roomId]=p2State[roomId]||{}; p2State[roomId][workId]='done'; save('p2State',p2State);
+            // conserve la valeur telle que saisie
+            const key = `${roomId}.${workId}`;
+            p2State[roomId]=p2State[roomId]||{}; p2State[roomId][workId]='done';
+            p2Answers[key] = input.value;
+            save('p2State',p2State); save('p2Answers', p2Answers);
             renderRooms(); updateP2Progress();
           }else{ input.focus(); input.select&&input.select(); }
         };
@@ -356,8 +386,9 @@
       document.getElementById('p2Pct').textContent = pct+'%';
       document.getElementById('p2Bar').style.width = pct+'%';
       const key = document.getElementById('p2Key');
-      if(pct>=100) key.removeAttribute('disabled'); else key.setAttribute('disabled','');
-      updateP3FromKeys();
+      if(pct>=100){ key.removeAttribute('disabled'); }
+      else { key.setAttribute('disabled',''); key.removeAttribute('open'); }
+      updateP3FromKeys(); updatePart2Lock();
     }
 
     // ========= 5) PARTIE 3 — CLÉS + GEOFENCE + CARTE POINT B & CHAUD/FROID ========
@@ -445,18 +476,31 @@
             L.tileLayer(TILE_URL, { attribution: TILE_ATTRIB, maxZoom: 19 }).addTo(p3Map);
             p3Map.setView([P3_B.lat, P3_B.lng], 15);
             p3BCircle = L.circle([P3_B.lat, P3_B.lng], { radius: P3_B.radius, color:'#2b6cb0', weight:1, fillOpacity:0.03 }).addTo(p3Map);
-            p3ACircle = L.circle([FINALE.lat, FINALE.lng], { radius: FINALE.radius, color:'#dc2626', weight:1, fillOpacity:0.06 }).addTo(p3Map);
-            p3AMarker = L.marker([FINALE.lat, FINALE.lng], { title:'Point A (objectif)' }).addTo(p3Map);
+            // p3ACircle : rendu uniquement quand le joueur est à ≤ 10m du Point A
+            // p3AMarker : rendu uniquement quand le joueur est à ≤ 10m du Point A
           }
           // Mettre à jour marqueur utilisateur P3 + couleur
           const dA = map.distance(here, [FINALE.lat, FINALE.lng]);
           const color = heatColor(dA);
           if(!p3UserMarker){ p3UserMarker = L.marker(here, { icon: userDivIcon(color) }).addTo(p3Map); }
           else { p3UserMarker.setLatLng(here); p3UserMarker.setIcon(userDivIcon(color)); }
+          // Afficher/masquer le Point A uniquement dans un rayon de 10 m
+          if(dA <= (FINALE.radius||10)){
+            if(!p3AMarker){ p3AMarker = L.marker([FINALE.lat, FINALE.lng], { title:'Point A (objectif)' }).addTo(p3Map); }
+            if(!p3ACircle){ p3ACircle = L.circle([FINALE.lat, FINALE.lng], { radius: FINALE.radius, color:'#dc2626', weight:1, fillOpacity:0.06 }).addTo(p3Map); }
+          } else {
+            if(p3AMarker){ p3Map.removeLayer(p3AMarker); p3AMarker = null; }
+            if(p3ACircle){ p3Map.removeLayer(p3ACircle); p3ACircle = null; }
+          }
           // Victoire à 10 m
           if(dA <= (FINALE.radius||10)){
             p3Status.textContent='🎯 Point final atteint !';
-            p3Action.style.display='block';
+            const v = document.getElementById('p3Victory');
+            if(v){ v.removeAttribute('disabled'); v.setAttribute('open',''); }
+            p3Action.style.display='none';
+          } else {
+            const v = document.getElementById('p3Victory');
+            if(v){ v.setAttribute('disabled',''); v.removeAttribute('open'); }
           }
         } else {
           // Hors zone de B → cacher la carte P3
@@ -484,10 +528,35 @@
       if(target==='part3' && p3Map){ setTimeout(()=> p3Map.invalidateSize(), 50); }
     }));
 
+    // ====== Contrôle d'accès à la Partie 2 (verrou si Partie 1 < 100%) ======
+    const btnPart2 = document.querySelector('#drawer .nav-item[data-target="part2"]');
+    function updatePart2Lock(){
+      const allowed = !document.getElementById('p1Key').hasAttribute('disabled');
+      if(allowed){
+        btnPart2 && btnPart2.removeAttribute('disabled');
+        if(btnPart2) btnPart2.title = '🖼️ Partie 2 — Vatican';
+      } else {
+        btnPart2 && btnPart2.setAttribute('disabled','');
+        if(btnPart2) btnPart2.title = '🔒 Termine d\'abord la Partie 1 (100%)';
+        // Si on est déjà sur la Partie 2, on renvoie vers la Partie 1
+        if(document.getElementById('part2').classList.contains('visible')){
+          const btnP1 = document.querySelector('#drawer .nav-item[data-target="part1"]');
+          btnP1 && btnP1.click();
+        }
+      }
+    }
+    // Bloque les clics sur le bouton Part 2 quand il est désactivé (sécurité supplémentaire)
+    document.addEventListener('click', (e)=>{
+      const t = e.target.closest && e.target.closest('#drawer .nav-item[data-target="part2"]');
+      if(t && t.hasAttribute('disabled')){ e.preventDefault(); e.stopPropagation(); alert('🔒 Termine d\'abord la Partie 1 (100%) pour accéder à la Partie 2.'); }
+    });
+
     // ========= 8) RENDER INIT ========
     PLACES.forEach(addPlaceMarker); renderList();
     renderRooms(); updateP2Progress();
-    updateP1Progress(); updateP3FromKeys();
+    updateP1Progress(); updateP3FromKeys(); updatePart2Lock();
+    // Si la victoire a déjà été atteinte dans une session précédente, débloquer le dossier
+    { const v=document.getElementById('p3Victory'); if(v){ v.setAttribute('disabled',''); v.removeAttribute('open'); } } 
     // iOS : demander d'appuyer sur 📍 pour activer la géoloc
   </script>
 </body>
