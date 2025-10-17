@@ -184,17 +184,17 @@
   <script>
     // ========= 1) CONFIG =========
     const PLACES = [
-      { id:'colisee', name:'Colisée', lat:41.8902, lng:12.4922, radius:20, question:"Au Colisée, notre 'gladiateur' du groupe avait quel surnom ?", answer:"le buffle", hint:"Surnom crié pendant le match de 2018…" },
-      { id:'trevi', name:'Fontaine de Trévi', lat:41.9009, lng:12.4833, radius:20, question:"Quel vœu absurde avons-nous fait ce soir-là ? (un mot)", answer:"licorne", hint:"Animal mythique + gelato pistache" },
-      { id:'cetu', name:'Mon Bureau', lat:45.73816138599714,  lng:4.924374644771908, radius:20, question:"Qui est mon collègue d'en face ?", answer:"EP", hint:"Animal mythique + gelato pistache" },
-      { id:'pantheon', name:'Panthéon', lat:41.8986, lng:12.4769, radius:20, question:"Comment s'appelle l'ouverture au sommet du dôme ?", answer:"oculus", hint:"Mot latin, 6 lettres" }
+      { id:'Rue', name:'Rue', lat:45.75298988775336,   lng:4.902415526263862, radius:20, question:"Qui est mon collègue d'en face ?", answer:"Rue", hint:"Animal mythique + gelato pistache" },
+	  { id:'TET', name:'TET', lat:45.751871310172014,  lng:4.901106574930881, radius:20, question:"Qui est mon collègue d'en face ?", answer:"TET", hint:"Animal mythique + gelato pistache" },
+	  { id:'ZEZ', name:'ZEZ', lat:45.75391346702639, lng: 4.903253843364583, radius:20, question:"Qui est mon collègue d'en face ?", answer:"ZEZ", hint:"Animal mythique + gelato pistache" },
+	  { id:'ded', name:'ded', lat:45.75296936359874,  lng: 4.904474550787475 , radius:20, question:"Qui est mon collègue d'en face ?", answer:"ded", hint:"Animal mythique + gelato pistache" }
       // 👉 Ajoute d'autres lieux
     ];
 
     const ROOMS = [
       { id:'salle1', name:'Salle 1', works:[
-        { id:'oeuvre1', title:"Raphaël – La Transfiguration", question:"Quel détail apparaît en haut à gauche ?", answer:"montagne", hint:"Paysage" },
-        { id:'oeuvre2', title:"Michel-Ange – Sibylle de Delphes", question:"L'objet qu'elle tient ?", answer:"livre", hint:"Lecture" }
+        { id:'oeuvre1', title:"Raphaël – La Transfiguration", question:"Quel détail apparaît en haut à gauche ?", answer:"Raphael", hint:"Paysage" },
+        { id:'oeuvre2', title:"Michel-Ange – Sibylle de Delphes", question:"L'objet qu'elle tient ?", answer:"Michel", hint:"Lecture" }
       ]},
       { id:'salle2', name:'Salle 2', works:[
         { id:'oeuvre3', title:"Carte de l'Italie – Couloir des cartes", question:"Quel golfe est indiqué près de Naples ?", answer:"golfe de naples", hint:"Géographie" }
@@ -203,9 +203,9 @@
     ];
 
     // Partie 3 — Point A (objectif final) + vidéo
-    const FINALE = { lat:48.88604516592345,   lng:2.2373824246612455, radius:10, youtube:"https://www.youtube.com/watch?v=dQw4w9WgXcQ" };
+    const FINALE = { lat:45.752751728673616,   lng:4.8988449543618025, radius:10, youtube:"https://youtube.com/shorts/GxVgj9djLY4?feature=shareQ" };
     // Partie 3 — Point B (déclencheur d'affichage de la carte P3 à 1500 m)
-    const P3_B = { lat:48.8843621343004,  lng:2.2462767830898454, radius:1500 };
+    const P3_B = { lat:45.75054211670309,   lng:4.897894951199942, radius:500 };
 
     const TILE_URL = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
     const TILE_ATTRIB = '&copy; contributeurs <a href="https://www.openstreetmap.org/">OpenStreetMap</a>';
