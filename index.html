@@ -131,18 +131,18 @@
             <div class="bar"><span id="p1Bar" style="width:0%"></span></div>
           </div>
           <details class="gages" id="p1Gages">
-            <summary>🎲 Gages (clique pour voir)</summary>
+            <summary>🎲 Gages </summary>
             <ul>
-              <li><label><input type="radio" name="p1gage" value="0-20"> 0–20% : Paie le restaurant à tout le groupe</label></li>
-              <li><label><input type="radio" name="p1gage" value="20-40"> 20–40% : Paie ta tournée</label></li>
-              <li><label><input type="radio" name="p1gage" value="40-60"> 40–60% : Paie une glace à l'organisateur</label></li>
-              <li><label><input type="radio" name="p1gage" value="60-80"> 60–80% : Fais un discours en italien</label></li>
-              <li><label><input type="radio" name="p1gage" value="80-99"> 80–99% : Selfie statue + pose gladiateur</label></li>
+              <li><label><input type="radio" name="p1gage" value="0-20"> 0–20% : Ils sont sympas les maillots du Milan non ? </label></li>
+              <li><label><input type="radio" name="p1gage" value="20-40"> 20–40% : J'aimerais beaucoup manger une glace tous les jours </label></li>
+              <li><label><input type="radio" name="p1gage" value="40-60"> 40–60% : Un restau et on en parle plus </label></li>
+              <li><label><input type="radio" name="p1gage" value="60-80"> 60–80% : Un petit selfie statue et une pose gladiateur ? </label></li>
+              <li><label><input type="radio" name="p1gage" value="80-99"> 80–99% : Une petite pipe et c'est réglé </label></li>
             </ul>
             <button id="p1GageDone" class="btn small">✅ Gage effectué → valider la Partie 1 à 100%</button>
           </details>
           <details id="p1Key" class="key" disabled>
-            <summary>📁 Clé 1 (débloquée à 100%)</summary>
+            <summary>📁 Clé 1</summary>
             <div class="key-content"><strong>Blanc</strong></div>
           </details>
           <div class="places" id="placesList"></div>
@@ -159,18 +159,18 @@
             <div class="bar"><span id="p2Bar" style="width:0%"></span></div>
           </div>
           <details class="gages" id="p2Gages">
-            <summary>🎲 Gages (clique pour voir)</summary>
+            <summary>🎲 Gages </summary>
             <ul>
-              <li><label><input type="radio" name="p2gage" value="0-20"> 0–20% : Paie le restaurant à tout le groupe</label></li>
-              <li><label><input type="radio" name="p2gage" value="20-40"> 20–40% : Paie ta tournée</label></li>
-              <li><label><input type="radio" name="p2gage" value="40-60"> 40–60% : Paie une glace à l'organisateur</label></li>
-              <li><label><input type="radio" name="p2gage" value="60-80"> 60–80% : Décris une œuvre en mimant</label></li>
-              <li><label><input type="radio" name="p2gage" value="80-99"> 80–99% : Selfie couloir des cartes</label></li>
+              <li><label><input type="radio" name="p2gage" value="0-20"> 0–20% : Tu dois absolument aller voir le pape, il suffit de le demander aux gardes et ça suffira je pense</label></li>
+              <li><label><input type="radio" name="p2gage" value="20-40"> 20–40% : J'aimerais bien te voir dans un costume de personnalité religieuse </label></li>
+              <li><label><input type="radio" name="p2gage" value="40-60"> 40–60% : J'ai le droit de te léchouiller le bout du nez autant que je veux !</label></li>
+              <li><label><input type="radio" name="p2gage" value="60-80"> 60–80% : Ma mamie aimerait beaucoup que tu lui offre un super cadeau du Vatican </label></li>
+              <li><label><input type="radio" name="p2gage" value="80-99"> 80–99% : Petit cliché en imitant une oeuvre ? </label></li>
             </ul>
             <button id="p2GageDone" class="btn small">✅ Gage effectué → valider la Partie 2 à 100%</button>
           </details>
           <details id="p2Key" class="key" disabled>
-            <summary>📁 Clé 2 (débloquée à 100%)</summary>
+            <summary>📁 Clé 2 </summary>
             <div class="key-content"><strong>Visage</strong></div>
           </details>
         </div>
@@ -182,15 +182,14 @@
     <!-- ===== PARTIE 3 : FINALE ===== -->
     <section id="part3" class="screen">
       <div class="card">
-        <h2>Finale — Trouve le parc</h2>
-        <p>Assemble les deux clés pour révéler le lieu final. Va au <strong>Point A</strong> (10 m) pour débloquer la vidéo de victoire.</p>
+        <h3>Finale </h3>
         <div id="p3Status" class="hint">🔒 En attente : il faut débloquer <strong>Clé 1</strong> et <strong>Clé 2</strong>.</div>
         <div class="progress">
           <div class="progress-row"><strong>Avancée</strong> — <span id="p3Pct">0%</span></div>
           <div class="bar"><span id="p3Bar" style="width:0%"></span></div>
         </div>
         <div id="p3Action" style="display:none">
-          <p>Dirige-toi vers le point final (rayon 10 m). Quand tu y es, ouvre le dossier <strong>Victoire</strong>.</p>
+         
         </div>
         <!-- Dossier Victoire (débloqué uniquement quand le Point A est atteint) -->
         <details id="p3Victory" class="key" disabled>
@@ -208,18 +207,139 @@
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
   <script>
     // ========= 1) CONFIG =========
-	
-    const PLACES = [
+
+  const PLACES = [
 	 // — Florence (exemples) —
-  { id:'f_duomo', name:'Piazza del Duomo (Florence)', lat:43.773449, lng:11.256236, radius:20,
+  { id:'f_duomo', name:'Piazza del Duomo', lat:43.773449, lng:11.256236, radius:20,
     question:"Quelle fleur apparaît sur le bas-relief central de la façade du Duomo ?", answer:"lys", hint:"symbole des Médicis" },
-  { id:'f_basilicasanmarco', name:'Basilique San Marco', lat:43.775000, lng:11.252000, radius:20,
-    question:"Quel moine dominicain célèbre y résida ?", answer:"savonarole", hint:"prédicateur florentin" },
+  { id:'f_ponte_vecchio', name:'Ponte Vecchio', lat:43.768009, lng:11.253165, radius:20,
+    question:"Quel métal orne les petites plaques des boutiques du pont ?", answer:"or", hint:"" },
+  { id:'f_uffizi', name:'Galerie des Offices', lat:43.767788, lng:11.255256, radius:20,
+    question:"Quel peintre a sa « Naissance de Vénus » dans cette galerie ?", answer:"botticelli", hint:"premier nom : Sandro" },
+  { id:'f_santacroce', name:'Basilique Santa Croce', lat:43.76883435791265,  lng:11.26162196723657, radius:20,
+    question:"Quels grands noms sont enterrés dans cette église ?", answer:"michel angelo, Machiavel, Galilée", hint:"sculpteur, politique, scientifique" },
+  { id:'f_signoria', name:'Piazza della Signoria', lat:43.76974701191463,  lng:11.255755261405659, radius:20,
+    question:"A qui est dédié la fontaine ?", answer:"Neptune", hint:"Petite planette" },
+ { id:'f_signoria', name:'Palazzo Vecchio', lat:43.769351884697215,  lng:11.255953744866352, radius:20,
+    question:"Quelle statue de héros biblique se tient devant le Palazzo Vecchio ici ?", answer:"david", hint:"statue de Michel-Ange (réplique)" },
+  { id:'f_piazzamelanogelo', name:'Piazzale Michelangelo', lat:43.762900, lng:11.258601, radius:20,
+    question:"Quel monument domine la vue sur Florence depuis cette terrasse ?", answer:"le duomo", hint:"coupole imposante" },
+	
+	{ id:'palais_medicic', name:'Palais Médici Riccardi', lat: 43.77514139265466, lng :11.255898279288544 , radius:20,
+    question:"De quelle siecle date ce palais ?", answer:"XV", hint:"En chiffre Romains" },
+	
+	{ id:'San lorenzo', name:'Basilique San Lorenzo', lat: 43.77528775990168, lng : 11.253465248674532 , radius:20,
+    question:"A quelle chapelle est accolée cette basilique ?", answer:"Chapelle des Medicis", hint:"Empoisonneuse" },
+
+	{ id:'Repubblica', name:'Piazza della Repubblica', lat: 43.771585499935114,  lng : 11.253940584384267, radius:20,
+    question:"Comment s'appelle la colonne ornant cette place ? ", answer:"Colonne de l'Abondance", hint:"" },
+
+	{ id:'Santa Maria', name:'Basilique Santa Maria Novella', lat: 43.77414579004759,   lng : 11.249402958897395, radius:20,
+    question:" De quel ordre mendiant important cette basilique était le point de référence ? ", answer:"Dominicains", hint:"..... nique nique ..." },
+
+	{ id:'Palais PItti', name:'Palazzo Piti', lat: 43.76536923796827, lng :  11.249879167388647, radius:20,
+    question:"Quel était le métier de Luca Pitti ", answer:"Banquier", hint:"Macron" },
+	
+	
+		{ id:'Santo spirito', name:'Basilique Santo Spirito ', lat: 	43.7669910356199,  lng : 11.248001907286234, radius:20,
+    question:"De qui est le crucifix en bois se trouvant dans la  sacristie ? ", answer:"Michel Ange", hint:"Toujours le même" },
+	
+		{ id:'Academie', name:'Gallerie de l academie ', lat: 43.776826269497626,  lng :  11.25857814320013, radius:20,
+    question:"Quelle sculpture est présente ici ?", answer:"David", hint:"" },
+	
+		{ id:'Boboli', name:'Jardin de Boboli ', lat: 43.762711926229315,   lng :   11.248512584904905, radius:500,
+    question:"Sur quel animal est assis le gros monsieur ?", answer:"Tortue", hint:"" },
+
+
+
   // — Rome (quelques exemples) —
-	{ id:'r_colosseo', name:'Colisée', lat:41.8902, lng:12.4922, radius:20, question:"Combien d’entrées principales comptait l’amphithéâtre à l’époque romaine ?", answer:"80", hint:"Nombre rond, très grand" },
-{ id:'r_arco_costantino', name:'Arc de Constantin', lat:41.8898, lng:12.4900, radius:20, question:"Quel empereur est honoré par cet arc ?", answer:"constantin", hint:"Empereur converti au christianisme" },
-{ id:'r_venere_roma', name:'Temple de Vénus et de Rome', lat:41.8908, lng:12.4929, radius:20, question:"À quelles deux divinités est dédié le temple ?", answer:"vénus et rome", hint:"Face au Colisée" },
-{ id:'r_domus_aurea', name:'Domus Aurea (Néron)', lat:41.8917, lng:12.4957, radius:20, question:"Quel empereur fit bâtir ce palais ?", answer:"néron", hint:"Après l’incendie" }
+	{ id:'r_circo_massimo', name:'Circus Maximus', lat:41.8852, lng:12.4856, radius:50, question:"Quelle film fait référence à ce cirque ?", answer:"Gladiator", hint:"Requin" },
+	{ id:'r_pantheon', name:'Panthéon', lat:41.8986, lng:12.4769, radius:200, question:"Comment s’appelle l’ouverture circulaire au sommet de la coupole ?", answer:"oculus", hint:"Mot latin" },
+	{ id:'r_piazza_navona', name:'Piazza Navona', lat:41.8992, lng:12.4731, radius:50, question:"Devine l'ambassade présente sur cette place seulement grace au drapeau", answer:"Brésil", hint:"" },
+	{ id:'r_fontana_trevi', name:'Fontaine de Trévi', lat:41.9009, lng:12.4833, radius:50, question:"Combien de pièces lancer pour assurer un retour à Rome ?", answer:"1", hint:"La tradition" },
+	{ id:'r_scala_spagna', name:'Escalier de la Trinité-des-Monts', lat:41.9059, lng:12.4823, radius:50, question:"Combien il y a t-il de marche ?", answer:"174", hint:"Fini par 4 et racine carrée de 30276" },
+	{ id:'r_trinita_monti', name:'Trinità dei Monti', lat:41.9066, lng:12.4829, radius:50, question:"En 1494 qui est à l'origine de cette église ? ", answer:"Charles VIII", hint:"Fils de Louis XI" },
+	{ id:'r_piazza_venezia', name:'Piazza Venezia', lat:41.8947, lng:12.4824, radius:100, question:"Quel surnom donne-t-on au monument à Victor-Emmanuel II ?", answer:"La machine à écrire", hint:"Un hobbie de Mercredi" },
+	{ id:'r_vittoriano', name:'Vittoriano (Autel de la Patrie)', lat:41.8949, lng:12.4823, radius:100, question:"Quel soldat y est honoré ?", answer:"soldat inconnu", hint:"Arc de Triomphe" },
+	{ id:'r_campidoglio', name:'Piazza del Campidoglio', lat:41.8931, lng:12.4825, radius:50, question:"Quel artiste a pris en charge la rénovation à l'occasion de la visite à Rome de l'empereur Charles Quint", answer:"michel-ange", hint:"Renaissance" },
+	{ id:'r_bocca_verita', name:'Bocca della Verità', lat:41.8881, lng:12.4791, radius:50, question:"Dans quoi faut-il mettre la main selon la légende ?", answer:"la bouche", hint:"Disque de marbre" },
+	{ id:'r_isola_tiberina', name:'Isola Tiberina', lat:41.8907, lng:12.4783, radius:50, question:"Quel fleuve entoure l’île ?", answer:"tibre", hint:"Fleuve de Rome" },
+	{ id:'r_castel_santangelo', name:'Castel Sant’Angelo', lat:41.9031, lng:12.4663, radius:200, question:"Quel empereur demande à l'architecte Demetriano de construire un mausolée funéraire pour lui et sa famille", answer:"Hadrien", hint:"Un H en trop" },
+	{ id:'r_ponte_santangelo', name:'Ponte Sant’Angelo', lat:41.9022, lng:12.4669, radius:50, question:"Combien d’anges bordent le pont (de chaque côté confondus) ?", answer:"10", hint:"Deux chiffres" },
+	{ id:'r_piazza_san_pietro', name:'Place Saint-Pierre', lat:41.9022, lng:12.4564, radius:50, question:"Qui a été crucifié la tête en bas dans ces lieux", answer:"Saint Pierre", hint:"Plutôt évident" },
+	{ id:'r_gianicolo', name:'Belvédère du Janicule', lat:41.891547836087575, lng:12.461059971688579, radius:40, question:"À midi, qu’entend-on chaque jour depuis 1904 ?", answer:"un coup de canon", hint:"Tradition" },
+	{ id:'r_teatro_marcello', name:'Théâtre de Marcellus', lat:41.8922, lng:12.4797, radius:100, question:"Vrai ou Faux ? Ce théatre est plus vieux que le Colisée ?", answer:"Vrai", hint:"" },
+	{ id:'r_largo_argentina', name:'Largo di Torre Argentina', lat:41.8963, lng:12.4768, radius:50, question:"2 question : Que trouve-t-on aujourd’hui parmi les ruines ? Et qui est mort proche de ce lieu ? ", answer:"Des chats et Cesar", hint:"" },
+	{ id:'r_ara_pacis', name:'Ara Pacis', lat:41.9086, lng:12.4768, radius:50, question:"À quel empereur est associée cette autel ?", answer:"auguste", hint:"Pax Augusta" },
+	{ id:'r_mausoleo_augusto', name:'Mausolée d’Auguste', lat:41.9069, lng:12.4762, radius:50, question:"Quel empereur y est enterré ?", answer:"auguste", hint:"Le premier empereur" },
+	{ id:'r_piazza_del_popolo', name:'Piazza del Popolo', lat:41.9109, lng:12.4768, radius:50, question:"Quel monument se dresse au centre ?", answer:"obélisque", hint:"Aiguille égyptienne" },
+	{ id:'r_villa_borghese', name:'Parc de la Villa Borghese', lat:41.9122, lng:12.4923, radius:50, question:"Quel musée célèbre se trouve dans le parc ?", answer:"galerie borghèse", hint:"Chef-d’œuvres du Bernin" },
+	{ id:'r_galleria_borghese', name:'Galleria Borghese', lat:41.9142, lng:12.4923, radius:50, question:"Quel sculpteur baroque y brille particulièrement ?", answer:"bernini", hint:"Le Bernin" },
+	{ id:'r_maxxi', name:'MAXXI (Musée du XXIe)', lat:41.9270, lng:12.4666, radius:50, question:"Quelle architecte a signé le bâtiment ?", answer:"zaha hadid", hint:"Architecture fluide" },
+	{ id:'r_auditorium', name:'Auditorium Parco della Musica', lat:41.9297, lng:12.4687, radius:50, question:"Quel matériau chaleureux recouvre l’intérieur ?", answer:"bois", hint:"Acoustique" },
+	{ id:'r_piazza_barberini', name:'Piazza Barberini – Triton', lat:41.9033, lng:12.4892, radius:50, question:"Quel sculpteur a réalisé la fontaine du Triton ?", answer:"le bernin", hint:"Baroque" },
+	{ id:'r_fontana_ape', name:'Fontaine des Abeilles', lat:41.9040, lng:12.4886, radius:50, question:"Quel insecte figure sur la fontaine ?", answer:"abeilles", hint:"Blason Barberini" },
+	{ id:'r_quirinale', name:'Palais du Quirinal', lat:41.8992, lng:12.4882, radius:50, question:"Qui y réside aujourd’hui (fonction) ?", answer:"président de la république", hint:"Chef d’État italien" },
+	{ id:'r_quattro_fontane', name:'Croisement des Quattro Fontane', lat:41.9035, lng:12.4929, radius:50, question:"Combien de fontaines à ce carrefour ?", answer:"4", hint:"Le nom le dit" },
+	{ id:'r_s_maria_vittoria', name:'Santa Maria della Vittoria', lat:41.9045, lng:12.4946, radius:50, question:"Quel groupe célèbre s’y trouve (sainte) ?", answer:"extase de sainte thérèse", hint:"Le Bernin" },
+	{ id:'r_colonna', name:'Piazza Colonna – Colonne de Marc Aurèle', lat:41.9017, lng:12.4792, radius:50, question:"À quel empereur est dédiée la colonne ?", answer:"marc aurèle", hint:"Bas-reliefs en spirale" },
+	{ id:'r_montecitorio', name:'Piazza Montecitorio – Obélisque', lat:41.9027, lng:12.4799, radius:50, question:"Quel type de monument s’y dresse ?", answer:"obélisque", hint:"Granite" },
+	{ id:'r_piazza_rotonda', name:'Piazza della Rotonda', lat:41.8980, lng:12.4768, radius:50, question:"Quel édifice monumental borde la place ?", answer:"panthéon", hint:"Grand oculus" },
+	{ id:'r_campo_fiori', name:'Campo de’ Fiori', lat:41.8956, lng:12.4722, radius:50, question:"Qui est la statue au centre ?", answer:"giordano bruno", hint:"Philosophe" },
+	{ id:'r_santagnese', name:'Sant’Agnese in Agone', lat:41.8996, lng:12.4733, radius:50, question:"Sur quelle place baroque se trouve l’église ?", answer:"piazza navona", hint:"Trois fontaines" },
+	{ id:'r_minerva', name:'Santa Maria sopra Minerva', lat:41.8983, lng:12.4777, radius:50, question:"Quel animal porte l’obélisque sur le parvis ?", answer:"éléphant", hint:"Statue du Bernin" },
+	{ id:'r_sant_ignazio', name:'Sant’Ignazio di Loyola', lat:41.8991, lng:12.4806, radius:50, question:"Quel effet optique au plafond simule une coupole ?", answer:"trompe-l'œil", hint:"Illusion peinte" },
+	{ id:'r_piazza_pietra', name:'Piazza di Pietra – Temple d’Hadrien', lat:41.9011, lng:12.4790, radius:50, question:"Combien de colonnes visibles restent alignées ?", answer:"11", hint:"Compte les colonnes" },
+	{ id:'r_terme_caracalla', name:'Thermes de Caracalla', lat:41.8790, lng:12.4932, radius:50, question:"Quel type d’édifice antique ?", answer:"bains", hint:"Thermes" },
+	{ id:'r_porta_san_sebastiano', name:'Porta San Sebastiano', lat:41.8736, lng:12.5018, radius:50, question:"Quelle voie antique commence ici ?", answer:"via appia", hint:"Reine des routes" },
+	{ id:'r_catacombe_callisto', name:'Catacombes de Saint-Callixte', lat:41.8474, lng:12.5210, radius:50, question:"Que trouve-t-on sous terre ici ?", answer:"sépultures", hint:"Cimetières chrétiens" },
+	{ id:'r_catacombe_sebastiano', name:'Catacombes de Saint-Sébastien', lat:41.8463, lng:12.5135, radius:50, question:"Quel martyr est honoré ?", answer:"saint sébastien", hint:"Flèches" },
+	{ id:'r_san_paolo_fuori', name:'Basilique Saint-Paul-hors-les-Murs', lat:41.8587, lng:12.4768, radius:50, question:"Quel apôtre y est vénéré ?", answer:"paul", hint:"Compagnon de Pierre" },
+	{ id:'r_piramide_cestia', name:'Pyramide de Cestius', lat:41.8756, lng:12.4823, radius:50, question:"Quel peuple a inspiré sa forme ?", answer:"égyptiens", hint:"Tombe triangulaire" },
+	{ id:'r_porta_san_paolo', name:'Porta San Paolo', lat:41.8749, lng:12.4829, radius:50, question:"Quel musée ferroviaire est tout proche ?", answer:"musée ostiense", hint:"Trains anciens" },
+	{ id:'r_gazometro', name:'Gazometro – Ostiense', lat:41.8668, lng:12.4726, radius:50, question:"Quelle structure métallique circulaire domine le quartier ?", answer:"gazomètre", hint:"Ancien réservoir" },
+	{ id:'r_monte_testaccio', name:'Monte Testaccio', lat:41.8729, lng:12.4752, radius:50, question:"De quoi est fait ce « mont » ?", answer:"amphores", hint:"Tessons empilés" },
+	{ id:'r_giardino_aranci', name:'Giardino degli Aranci', lat:41.8842, lng:12.4799, radius:50, question:"Quel parfum donne son nom au jardin ?", answer:"orangers", hint:"Agrumes" },
+	{ id:'r_buco_serratura', name:'Trou de la Serrure (Aventin)', lat:41.8870, lng:12.4776, radius:50, question:"À travers le trou, quel dôme célèbre aperçoit-on ?", answer:"saint-pierre", hint:"Vue parfaite" },
+	{ id:'r_santa_sabina', name:'Basilique Santa Sabina', lat:41.8879, lng:12.4792, radius:50, question:"Quel bois antique composent ses portes célèbres ?", answer:"cèdre", hint:"Panneaux sculptés" },
+	{ id:'r_circo_maxentius', name:'Cirque de Maxence (Via Appia)', lat:41.8344, lng:12.5219, radius:50, question:"Quel empereur fit bâtir ce cirque ?", answer:"maxence", hint:"IVe siècle" },
+	{ id:'r_cecilia_metella', name:'Mausolée de Cécilia Metella', lat:41.8397, lng:12.5115, radius:50, question:"Quelle forme architecturale principale ?", answer:"cylindre", hint:"Tombe circulaire" },
+	{ id:'r_fontana_rane', name:'Fontana delle Rane (Coppedè)', lat:41.9199, lng:12.4995, radius:50, question:"Quel animal orne la fontaine ?", answer:"grenouilles", hint:"Amphibiens" },
+	{ id:'r_san_luigi_francesi', name:'San Luigi dei Francesi', lat:41.8990, lng:12.4767, radius:50, question:"Quel peintre y a trois toiles de Saint Matthieu ?", answer:"caravage", hint:"Clair-obscur" },
+	{ id:'r_sant_agostino', name:'Sant’Agostino', lat:41.9004, lng:12.4749, radius:50, question:"Quel peintre y a une « Madone des Pèlerins » ?", answer:"caravage", hint:"Pieds sales" },
+	{ id:'r_maria_pace', name:'Santa Maria della Pace', lat:41.9005, lng:12.4729, radius:50, question:"Quel architecte a conçu le petit cloître ?", answer:"bramante", hint:"Renaissance" },
+	{ id:'r_villa_medici', name:'Villa Médicis', lat:41.9090, lng:12.4851, radius:50, question:"Quel pays y a son académie d’art ?", answer:"france", hint:"Académie française" },
+	{ id:'r_palazzo_spada', name:'Palazzo Spada – Perspective', lat:41.8947, lng:12.4728, radius:50, question:"Quel architecte réalisa la galerie en trompe-l’œil ?", answer:"borromini", hint:"Perspective forcée" },
+	{ id:'r_san_clemente', name:'Basilique San Clemente', lat:41.8893, lng:12.4989, radius:50, question:"Combien de niveaux archéologiques superposés ?", answer:"3", hint:"Strates" },
+	{ id:'r_san_giovanni', name:'Archibasilique Saint-Jean de Latran', lat:41.8864, lng:12.5057, radius:50, question:"Quel rang porte cette basilique ?", answer:"archibasilique", hint:"La plus haute dignité" },
+	{ id:'r_scala_santa', name:'Scala Santa (Saintes Marches)', lat:41.8859, lng:12.5067, radius:50, question:"Que font certains pèlerins sur ces marches ?", answer:"montent à genoux", hint:"Dévotion" },
+	{ id:'r_santa_croce', name:'Santa Croce in Gerusalemme', lat:41.8869, lng:12.5141, radius:50, question:"Quel type de reliques y est conservé ?", answer:"de la croix", hint:"Passion" },
+	{ id:'r_santa_maria_maggiore', name:'Basilique Sainte-Marie-Majeure', lat:41.8979, lng:12.4989, radius:50, question:"Quel métal précieux recouvre le plafond ?", answer:"or", hint:"Don d’Espagne" },
+	{ id:'r_piazza_vittorio', name:'Piazza Vittorio – Porta Magica', lat:41.8945, lng:12.5057, radius:50, question:"Quel adjectif qualifie la petite porte du parc ?", answer:"magique", hint:"Alchimie" },
+	{ id:'r_santa_prassede', name:'Santa Prassede', lat:41.8972, lng:12.4984, radius:50, question:"Quelle chapelle est célèbre pour ses mosaïques byzantines ?", answer:"san zenone", hint:"Bleus profonds" },
+	{ id:'r_aracoeli', name:'Santa Maria in Aracoeli', lat:41.8936, lng:12.4829, radius:50, question:"Que montes-tu pour y accéder ?", answer:"un escalier", hint:"Beaucoup de marches" },
+	{ id:'r_santandrea_valle', name:'Sant’Andrea della Valle', lat:41.8960, lng:12.4760, radius:50, question:"Quelle œuvre lyrique débute ici (Puccini) ?", answer:"tosca", hint:"Acte I" },
+	{ id:'r_sant_ivo', name:'Sant’Ivo alla Sapienza', lat:41.8980, lng:12.4766, radius:50, question:"Quelle forme a la flèche du dôme ?", answer:"spirale", hint:"Cochlea" },
+	{ id:'r_fontana_tartarughe', name:'Fontana delle Tartarughe', lat:41.8947, lng:12.4751, radius:50, question:"Quel animal orne la fontaine ?", answer:"tortues", hint:"Bronze" },
+	{ id:'r_piazza_colonna_poste', name:'Piazza Colonna – Palais des Postes', lat:41.9018, lng:12.4796, radius:50, question:"Quelle colonne antique voisine la place ?", answer:"marc aurèle", hint:"Colonne triomphale" },
+	{ id:'r_via_condotti', name:'Via dei Condotti', lat:41.9052, lng:12.4806, radius:50, question:"Quel type de boutiques célèbre la rue ?", answer:"luxe", hint:"Grandes marques" },
+	{ id:'r_via_del_corso', name:'Via del Corso (milieu)', lat:41.9024, lng:12.4798, radius:50, question:"Entre quelles places principales s’étend la rue ?", answer:"venezia et popolo", hint:"Du centre au nord" },
+	{ id:'r_termine', name:'Gare Termini – Façade', lat:41.9010, lng:12.5014, radius:50, question:"Quel moyen de transport principal ici ?", answer:"train", hint:"Gare" },
+	{ id:'r_quartiere_coppede', name:'Quartier Coppedè – Entrée', lat:41.9189, lng:12.4992, radius:50, question:"Quel style éclectique le caractérise ?", answer:"art nouveau", hint:"Liberty" },
+	{ id:'r_piazza_bologna_popolo', name:'Piazza del Popolo – Églises jumelles', lat:41.9102, lng:12.4762, radius:50, question:"Combien d’églises « jumelles » bordent le sud de la place ?", answer:"2", hint:"Symétrie" },
+	{ id:'r_cavour', name:'Piazza Cavour – Palais de Justice', lat:41.9059, lng:12.4682, radius:50, question:"Quel pouvoir s’exerce dans ce palais ?", answer:"justice", hint:"Cour de cassation" },
+	{ id:'r_villa_celib', name:'Piazza di Siena (Villa Borghese)', lat:41.9156, lng:12.4903, radius:50, question:"Quel type d’événement équestre célèbre s’y tient ?", answer:"concours hippique", hint:"Sauts d’obstacles" },
+	{ id:'r_marcello_portico', name:'Porta Portese (marché)', lat:41.8779, lng:12.4675, radius:50, question:"Quel jour le marché aux puces bat son plein ?", answer:"dimanche", hint:"Week-end" },
+	{ id:'r_porta_maggiore', name:'Porta Maggiore', lat:41.8897, lng:12.5150, radius:50, question:"Quelle structure antique traverse la porte ?", answer:"aqueduc", hint:"Eau" },
+	{ id:'r_santa_costanza', name:'Mausolée de Sainte-Constance', lat:41.9266, lng:12.5208, radius:50, question:"Quel plan a l’édifice ?", answer:"circular", hint:"Rotonde" },
+	{ id:'r_sant_croce_ger', name:'San Lorenzo fuori le mura', lat:41.9021, lng:12.5247, radius:50, question:"Quel saint y est honoré (nom) ?", answer:"laurent", hint:"Grille" },
+	{ id:'r_eur_quadrato', name:'Palazzo della Civiltà Italiana (EUR)', lat:41.8359, lng:12.4653, radius:50, question:"Quel surnom porte le bâtiment ?", answer:"colisée carré", hint:"Arches régulières" },
+	{ id:'r_eur_laghetto', name:'Lac de l’EUR – Pont', lat:41.8308, lng:12.4678, radius:50, question:"Quel plan d’eau orne le quartier ?", answer:"lac", hint:"Plan d’eau" },
+	{ id:'r_forum_trajan', name:'Forum de Trajan', lat:41.8958, lng:12.4846, radius:50, question:"Quelle colonne triomphale s’y dresse ?", answer:"colonne trajane", hint:"Bas-reliefs hélicoïdaux" },
+	{ id:'r_markets_trajan', name:'Marchés de Trajan', lat:41.8952, lng:12.4857, radius:50, question:"Quel type de bâtiment antique était-ce ?", answer:"marché", hint:"Commerces superposés" },
+	{ id:'r_forum_caesar', name:'Forum de César', lat:41.8950, lng:12.4867, radius:50, question:"Quel dictateur lui a donné son nom ?", answer:"césar", hint:"Jules" },
+	{ id:'r_forum_augustus', name:'Forum d’Auguste', lat:41.8959, lng:12.4875, radius:50, question:"Quel empereur honore ce forum ?", answer:"auguste", hint:"Premier empereur" },
+	{ id:'r_domus_aurea', name:'Domus Aurea (Néron)', lat:41.8917, lng:12.4957, radius:50, question:"Quel empereur fit bâtir ce palais ?", answer:"néron", hint:"Après l’incendie" }
   
     ];
 
@@ -524,7 +644,7 @@
       const k2=!document.getElementById('p2Key').hasAttribute('disabled');
       const pct=(k1?50:0)+(k2?50:0);
       p3Pct.textContent=pct+'%'; p3Bar.style.width=pct+'%';
-      if(k1&&k2){ p3Status.textContent='✅ Clés réunies ! Va au point final (10 m).'; p3Action.style.display='block'; }
+      if(k1&&k2){ p3Status.textContent='✅ Clés réunies ! Devine le lieu à partir des clés et rechauffe toi pour trouver le point final et débloquer ta récompense éternelle.'; p3Action.style.display='block'; }
       else { p3Status.innerHTML='🔒 En attente : il faut débloquer <strong>Clé 1</strong> et <strong>Clé 2</strong>.'; p3Action.style.display='none'; }
     }
 
