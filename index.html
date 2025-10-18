@@ -9,22 +9,33 @@
     :root{--brand:#2b6cb0;--ok:#2f855a;--warn:#b7791f;--err:#c53030;}
     html,body{height:100%;margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,'Helvetica Neue',Arial,'Noto Sans','Apple Color Emoji','Segoe UI Emoji';}
     /* Mise en page avec menu */
-    #app.with-drawer{display:grid;grid-template-columns:260px 1fr;grid-template-rows:auto 1fr;min-height:100vh;}
+    /* Layout simplifié : une seule colonne, menu latéral désactivé */
+    #app{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;min-height:100vh;}
+    /* Ancien layout (désactivé) */
+    #app.with-drawer{display:grid;grid-template-columns:1fr;grid-template-rows:auto 1fr;}
+    /* On force le drawer à ne plus s'afficher */
+    #drawer{display:none !important;}
     #drawer{grid-row:1/span 2;grid-column:1;background:#0f2747;color:#fff;padding:12px;display:block;}
-    #drawer .drawer-header{font-weight:700;margin-bottom:10px;}
+    #drawer .drawer-header{grid-column:1;padding:10px 14px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+    header h1{font-size:16px;margin:0;font-weight:700}
+    header .btn{border:0;background:rgba(255,255,255,.15);color:#fff;padding:8px 10px;border-radius:10px;font-size:14px}
+    .top-nav{display:flex;gap:8px;flex-wrap:wrap}
+    .top-nav.collapsed{display:none}
+    .top-nav .nav-item{background:rgba(255,255,255,.15);color:#fff;border:0;border-radius:10px;padding:6px 10px;cursor:pointer}
+    .top-nav .nav-item.active{background:rgba(255,255,255,.28)}
+    .badge{display:inline-flex;align-items:center;gap:6px;background:#edf2f7;border-radius:999px;padding:4px 8px;font-size:12px;color:#1a202c}
+    .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     #drawer .nav-item{width:100%;text-align:left;background:transparent;border:0;color:#fff;padding:10px;border-radius:8px;cursor:pointer}
     #drawer .nav-item.active,#drawer .nav-item:hover{background:rgba(255,255,255,.12)}
     #drawer .nav-item[disabled]{opacity:.5; pointer-events:none; cursor:not-allowed;}
-    header{grid-column:2;padding:10px 14px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px}
+    header{grid-column:1;padding:10px 14px;background:var(--brand);color:#fff;position:sticky;top:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;gap:12px}
     header h1{font-size:16px;margin:0;font-weight:700}
     header .btn{border:0;background:rgba(255,255,255,.15);color:#fff;padding:8px 10px;border-radius:10px;font-size:14px}
     .badge{display:inline-flex;align-items:center;gap:6px;background:#edf2f7;border-radius:999px;padding:4px 8px;font-size:12px;color:#1a202c}
     .legend{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
     /* Écrans */
-    .screen{grid-column:2;display:none;position:relative}
+    .screen{grid-column:1;display:none;position:relative}
     .screen.visible{display:block}
-	/* Quand le menu de gauche est replié, header + écrans se placent sur la 1ère colonne */
-    #app.without-drawer header, #app.without-drawer .screen{grid-column:1;}
     /* Carte + panneaux */
     #map{height:calc(100vh - 70px)}
     #mapP3{height:60vh;border-radius:12px;box-shadow:0 6px 20px rgba(0,0,0,.08);margin-top:10px}
@@ -48,22 +59,6 @@
     .popup input{width:100%;padding:10px;border-radius:10px;border:1px solid #cbd5e0;margin-bottom:8px}
     .popup button{width:100%;padding:10px;border-radius:10px;border:0;background:var(--brand);color:#fff;font-weight:600}
     .hint{font-size:12px;color:#4a5568}
-	/* Quand le menu est replié (mobile), header et écran occupent la 1re colonne */
-    #app.without-drawer header,
-    #app.without-drawer .screen { grid-column: 1; }
-
-    /* Panneau bas repliable */
-	.panel { position:fixed; left:10px; right:10px; bottom:10px; display:flex; gap:10px; z-index:1001; transition:transform .25s ease, opacity .25s ease; }
-	.panel.collapsed { transform: translateY(110%); opacity:0; pointer-events:none; }
-
-	.panel-toggle { position:fixed; right:16px; bottom:16px; z-index:1002; }
-	.panel-toggle button{ border:0; background:#fff; box-shadow:0 6px 20px rgba(0,0,0,.2); border-radius:999px; padding:10px 12px; }
-
-	/* Sur petits écrans, on réduit l’entête */
-	@media (max-width: 900px){
-      header h1{ font-size:14px }
-	}
-
     /* Progress bars */
     .progress{margin:8px 0 10px}
     .progress-row{font-size:14px;margin-bottom:6px}
@@ -95,11 +90,15 @@
     </aside>
 
     <header>
-      <button id="btnDrawer" class="btn" title="Ouvrir le menu">☰</button>
+      <button id="btnDrawer" class="btn" title="Replier/afficher le menu du haut">☰</button>
       <h1>Jeu de piste Rome</h1>
+      <nav id="topNav" class="top-nav">
+        <button class="nav-item active" data-target="part1">🗺️ Partie 1</button>
+        <button class="nav-item" data-target="part2">🖼️ Partie 2</button>
+        <button class="nav-item" data-target="part3">🌳 Partie 3</button>
+      </nav>
       <div class="legend">
         <span class="badge">🔒 verrouillé</span>
-        <span class="badge">🔓 à portée</span>
         <span class="badge">✅ validé</span>
       </div>
       <button id="btnReset" class="btn" title="Réinitialiser la progression">Réinitialiser</button>
@@ -112,10 +111,6 @@
       <div class="fab">
         <button id="btnLocate" title="Me localiser">📍</button>
       </div>
-	  <div class="panel-toggle">
-		<button id="btnPanelToggle" title="Afficher / masquer le panneau">⬆️</button>
-	  </div>
-
 
       <div class="panel">
         <div class="card">
@@ -394,21 +389,6 @@
     const GEO_OPTIONS = { enableHighAccuracy: true, maximumAge: 5000, timeout: 20000 };
 
     // ========= 2) UTIL ========
-	// Helpers d'UI (drawer & panneau bas)
-	function setDrawer(open){
-		const app = document.getElementById('app');
-		if(open){ app.classList.add('with-drawer'); app.classList.remove('without-drawer'); }
-		else    { app.classList.add('without-drawer'); app.classList.remove('with-drawer'); }
-		// Recalibrer les cartes visibles
-		setTimeout(()=>{ try{ map && map.invalidateSize(); }catch(e){} try{ p3Map && p3Map.invalidateSize && p3Map.invalidateSize(); }catch(e){} }, 150);
-	}
-	function isPanelCollapsed(){ return document.querySelector('.panel')?.classList.contains('collapsed'); }
-	function setPanelCollapsed(collapsed){
-		const panel = document.querySelector('.panel');
-		if(!panel) return;
-		if(collapsed) panel.classList.add('collapsed'); else panel.classList.remove('collapsed');
-	}
-
     const normalize = (s)=> (s||'').toString().normalize('NFD').replace(/\p{Diacritic}/gu,'').trim().toLowerCase();
     const storageKey = (k)=> `rome-game-${k}`;
     const save = (k,v)=> localStorage.setItem(storageKey(k), JSON.stringify(v));
@@ -428,26 +408,6 @@
     const map = L.map('map');
     L.tileLayer(TILE_URL, { attribution: TILE_ATTRIB, maxZoom: 19 }).addTo(map);
     map.setView(START_VIEW, START_ZOOM);
-	// Mobile: menu fermé et panneau bas replié par défaut
-	const preferCollapsed = window.innerWidth < 900;
-	setDrawer(!preferCollapsed);          // sur mobile => menu fermé
-	setPanelCollapsed(preferCollapsed);   // sur mobile => panneau bas replié
-
-	// Bouton menu (☰) : ouvre/ferme le panneau gauche
-	const btnDrawer = document.getElementById('btnDrawer');
-	btnDrawer?.addEventListener('click', ()=>{
-		const app = document.getElementById('app');
-		const open = !app.classList.contains('with-drawer');
-		setDrawer(open);
-	});
-
-	// Bouton panneau bas (⬆️ / ⬇️) : affiche/masque la zone lieux+gages+clé
-	const btnPanelToggle = document.getElementById('btnPanelToggle');
-	btnPanelToggle?.addEventListener('click', ()=>{
-		const collapsed = isPanelCollapsed();
-		setPanelCollapsed(!collapsed);
-		btnPanelToggle.textContent = collapsed ? '⬇️' : '⬆️';
-	});
 
     map.on('popupopen', (e) => {
       const el = e.popup && e.popup.getElement ? e.popup.getElement() : (e.popup && e.popup._container);
@@ -462,7 +422,30 @@
     let userMarker = null, accuracyCircle = null;
 
     const placesList = document.getElementById('placesList');
-
+// ===== NAV HAUT (Partie 1/2/3) et bouton ☰ pour replier/afficher =====
+    function showScreen(id){
+      document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
+      const el = document.getElementById(id); if(el) el.classList.add('visible');
+      document.querySelectorAll('#topNav .nav-item').forEach(b=>{
+        b.classList.toggle('active', b.getAttribute('data-target')===id);
+      });
+      // Panneau bas seulement en Partie 1
+      const panel = document.querySelector('.panel');
+      if(panel) panel.style.display = (id==='part1') ? 'flex' : 'none';
+      setTimeout(()=>{
+        try{ if(id==='part1') map.invalidateSize(); }catch(e){}
+        try{ if(id==='part3' && typeof p3Map!=='undefined' && p3Map) p3Map.invalidateSize(); }catch(e){}
+      },120);
+    }
+    document.querySelectorAll('#topNav .nav-item').forEach(btn=>{
+      btn.addEventListener('click', ()=> showScreen(btn.getAttribute('data-target')));
+    });
+    const btnDrawer = document.getElementById('btnDrawer');
+    btnDrawer?.addEventListener('click', ()=>{
+      const top = document.getElementById('topNav');
+      top.classList.toggle('collapsed');
+    });
+	
     function renderList(){
       placesList.innerHTML='';
       PLACES.forEach(p=>{
@@ -750,29 +733,6 @@
     }
 
     // ========= 7) NAV + BOUTONS ========
-	function showScreen(id){
-		document.querySelectorAll('.screen').forEach(s=>s.classList.remove('visible'));
-		const el = document.getElementById(id);
-		if(el){ el.classList.add('visible'); }
-		// Panneau bas uniquement en Partie 1
-		const panel = document.querySelector('.panel');
-		if(panel){ panel.style.display = (id==='part1') ? 'flex' : 'none'; }
-		// Recalibrage des cartes visibles
-		setTimeout(()=>{
-			if(id==='part1') try{ map.invalidateSize(); }catch(e){}
-			if(id==='part3') try{ p3Map && p3Map.invalidateSize(); }catch(e){}
-		}, 120);
-	}
-	// Branchement des boutons du menu gauche
-	[...document.querySelectorAll('#drawer .nav-item')].forEach(btn=>{
-		btn.addEventListener('click', ()=>{
-			const target = btn.getAttribute('data-target');
-			showScreen(target);
-			// Sur mobile: refermer le menu après le choix
-			if(window.innerWidth < 900){ setDrawer(false); }
-		});
-	});
-
     document.getElementById('btnLocate').addEventListener('click', ()=>{ ensureLocate(); if(userMarker) map.setView(userMarker.getLatLng(), 17, {animate:true}); });
     document.getElementById('btnReset').addEventListener('click', ()=>{ if(!confirm('Réinitialiser toute la progression ?')) return; localStorage.clear(); location.reload(); });
 
