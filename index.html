@@ -73,7 +73,7 @@
     .room h3{margin-top:0}
     .work{display:flex;gap:8px;align-items:center;padding:6px 0}
     .work .state{width:22px;text-align:center}
-    .work input[type=text]{flex:1;padding:8px;border-radius:8px;border:1px solid #cbd5e0}
+	.work input[type=text]{flex:1;min-width:0;width:100%;max-width:100%;box-sizing:border-box;padding:8px;border-radius:8px;border:1px solid #cbd5e0}
     .work button{padding:8px 10px;border-radius:8px;border:0;background:var(--brand);color:#fff}
     .btn.small{padding:6px 10px;font-size:12px}
 	.panel.collapsed {
@@ -81,6 +81,10 @@
 		opacity: 0;
 		pointer-events: none;
 		transition: transform 0.3s ease, opacity 0.3s ease;
+	}
+	@media (max-width:600px){
+   .work input[type=text]{font-size:14px;padding:6px;width:100%;}
+   .work button{flex-shrink:0;}
 	}
   </style>
 </head>
